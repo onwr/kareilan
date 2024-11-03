@@ -5,6 +5,7 @@ import ProfilOlustur from './pages/hesap/ProfilOlustur';
 import IlanDetay from './pages/ilan/IlanDetay';
 import FotoIlan from './pages/fotoilan/FotoIlan';
 import { Toaster } from 'react-hot-toast';
+import Profilim from './pages/profil/Profilim';
 
 const App = () => (
   <>
@@ -14,6 +15,7 @@ const App = () => (
         <Route path='/hesap/olustur' element={<ProfilOlustur />} />
         <Route path='/ilan/:id' element={<IlanDetay />} />
         <Route path='/fotoilan/:id' element={<FotoIlan />} />
+        <Route path='/hesap/panel' element={<Profilim />} />
       </Routes>
     </BrowserRouter>
     <Toaster position='top-center' reverseOrder={false} />

@@ -6,6 +6,9 @@ import { auth, db } from '../../db/Firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
+import Loader from 'src/layout/Loader';
+import Cookies from 'js-cookie';
 
 const Giris = () => {
   const [formData, setFormData] = useState({
@@ -16,6 +19,9 @@ const Giris = () => {
     ymmNo: '',
     sifre: '',
   });
+  const [loading, setLoading] = useState(false);
+
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -37,13 +43,34 @@ const Giris = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
     const { email, ad, firma, gsm, ymmNo, sifre } = formData;
+
+    if (sifre.length < 6) {
+      toast.error('Şifreniz en az 6 karakter olmalıdır');
+      setLoading(false);
+      return;
+    }
+
+    if (!email || !ad || !firma || !gsm || !ymmNo || !sifre) {
+      toast.error('Lütfen tüm alanları doldurunuz');
+      setLoading(false);
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast.error('Geçersiz e-posta adresi');
+      setLoading(false);
+      return;
+    }
 
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, sifre);
 
       const userId = userCredential.user.uid;
+      const randomKod = Math.floor(10000 + Math.random() * 90000);
 
       await setDoc(doc(db, 'kullanicilar', userId), {
         ad,
@@ -52,15 +79,31 @@ const Giris = () => {
         email,
         ymmNo,
         sifre,
+        uid: userId,
+        fKod: randomKod,
+        olusturmaTarih: new Date().toISOString(),
       });
 
       toast.success('Kayıt başarılı. Yönlendiriliyorsunuz...');
+      Cookies.set('userToken', userId, { expires: 7 });
+      setLoading(false);
+      navigate('/hesap/panel');
     } catch (error) {
-      toast.error('500');
+      if (error.code === 'auth/email-already-in-use') {
+        toast.error('Bu e-posta adresi zaten kullanımda.');
+        setLoading(false);
+        return;
+      } else {
+        toast.error('Kayıt başarısız oldu. Daha sonra tekrar deneyiniz');
+        setLoading(false);
+        return;
+      }
     }
   };
 
-  return (
+  return loading ? (
+    <Loader />
+  ) : (
     <div className='flex min-h-screen select-none'>
       <img
         src={emlak}
