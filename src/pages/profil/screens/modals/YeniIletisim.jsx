@@ -1,9 +1,6 @@
-import { doc, setDoc } from 'firebase/firestore';
 import React, { useState } from 'react';
-import toast from 'react-hot-toast';
-import { db } from 'src/db/Firebase';
 
-const IletisimBilgi = ({ onClose, token }) => {
+const YeniIletisimBilgi = ({ onClose, onSave }) => {
   const [contactInfo, setContactInfo] = useState({
     telefon: '',
     whatsapp: '',
@@ -34,32 +31,22 @@ const IletisimBilgi = ({ onClose, token }) => {
     setContactInfo({ ...contactInfo, [name]: formattedValue });
   };
 
-  const handleSave = async (e) => {
-    e.preventDefault();
-
-    try {
-      const docRef = doc(db, 'kullanicilar', token);
-
-      await setDoc(docRef, { mevcutBilgi: contactInfo }, { merge: true });
-
-      toast.success('Bilgiler kaydedildi.');
-      onClose();
-    } catch (error) {
-      toast.error('Daha sonra tekrar deneyiniz.');
-    }
+  const handleSave = () => {
+    onSave(contactInfo);
   };
 
   return (
     <div className='fixed inset-0 right-0 top-0 flex items-center justify-center bg-black bg-opacity-70 px-2'>
       <div className='w-full max-w-md rounded-md bg-white p-6'>
-        <p className='mb-4 text-lg font-medium'>Mevcut İletişim Bilgileri Ekle</p>
-
+        <p className='mb-4 text-lg font-medium'>Yeni İletişim Bilgileri Ekle</p>
         <input
           type='text'
           name='telefon'
+          autoFocus
           placeholder='Telefon Numarası'
           className='mb-3 w-full rounded border p-2 outline-none ring-yellow-300 duration-300 focus:ring-2'
           value={contactInfo.telefon}
+          required
           maxLength={15}
           onChange={handleChange}
         />
@@ -69,6 +56,7 @@ const IletisimBilgi = ({ onClose, token }) => {
           name='whatsapp'
           placeholder='WhatsApp'
           maxLength={15}
+          required
           className='mb-3 w-full rounded border p-2 outline-none ring-yellow-300 duration-300 focus:ring-2'
           value={contactInfo.whatsapp}
           onChange={handleChange}
@@ -77,6 +65,7 @@ const IletisimBilgi = ({ onClose, token }) => {
         <input
           type='email'
           name='email'
+          required
           placeholder='E-posta'
           className='mb-5 w-full rounded border p-2 outline-none ring-yellow-300 duration-300 focus:ring-2'
           value={contactInfo.email}
@@ -102,4 +91,4 @@ const IletisimBilgi = ({ onClose, token }) => {
   );
 };
 
-export default IletisimBilgi;
+export default YeniIletisimBilgi;

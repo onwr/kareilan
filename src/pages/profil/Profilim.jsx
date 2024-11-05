@@ -77,7 +77,7 @@ const Profilim = () => {
     <div className='flex min-h-screen items-center justify-center bg-neutral-200 px-1'>
       <img
         src={emlakBG}
-        className='absolute right-0 top-0 z-0 h-full w-full bg-cover opacity-5'
+        className='absolute right-0 top-0 z-0 h-full w-full bg-cover opacity-15'
         alt='background'
       />
       <div className='container z-10 mx-auto max-w-screen-xl rounded-xl border border-neutral-300 bg-zinc-50 p-4'>
