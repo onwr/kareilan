@@ -6,6 +6,7 @@ import IlanDetay from './pages/ilan/IlanDetay';
 import FotoIlan from './pages/fotoilan/FotoIlan';
 import { Toaster } from 'react-hot-toast';
 import Profilim from './pages/profil/Profilim';
+import Sablonlar from './pages/Sablonlar';
 
 const App = () => (
   <>
@@ -16,6 +17,7 @@ const App = () => (
         <Route path='/ilan/:id' element={<IlanDetay />} />
         <Route path='/fotoilan/:id' element={<FotoIlan />} />
         <Route path='/hesap/panel' element={<Profilim />} />
+        <Route path='/sablonlar' element={<Sablonlar />} />
       </Routes>
     </BrowserRouter>
     <Toaster position='top-center' reverseOrder={false} />

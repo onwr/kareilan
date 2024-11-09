@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import logo from '@images/logo.png';
 import emlakBG from '@images/emlakbg.avif';
 import Loader from 'src/layout/Loader';
 import { AiOutlineLogout } from 'react-icons/ai';
@@ -22,6 +21,7 @@ const Profilim = () => {
   const [emlak, setEmlak] = useState({});
   const [formData, setFormData] = useState({});
   const userToken = Cookies.get('userToken');
+  const slug = Cookies.get('slug');
   const navigate = useNavigate();
   const [selectScreen, setSelectScreen] = useState(0);
 
@@ -54,6 +54,21 @@ const Profilim = () => {
     veriCek();
   }, []);
 
+  useEffect(() => {
+    const handleBackButton = (e) => {
+      e.preventDefault();
+      if (selectScreen !== 0) {
+        setSelectScreen(0);
+      }
+    };
+
+    window.addEventListener('popstate', handleBackButton);
+
+    return () => {
+      window.removeEventListener('popstate', handleBackButton);
+    };
+  }, [selectScreen]);
+
   const handleUpdate = async () => {
     try {
       const docRef = doc(db, 'kullanicilar', userToken);
@@ -81,24 +96,26 @@ const Profilim = () => {
         className='absolute right-0 top-0 z-0 h-full w-full bg-cover opacity-15'
         alt='background'
       />
-      <div className='container z-10 mx-auto max-w-screen-xl rounded-xl border border-neutral-300 bg-zinc-50 p-4'>
-        <div className='flex items-center justify-between'>
-          <div className='flex items-center rounded-full border bg-yellow-200 p-2'>
+      <div className='container z-10 mx-auto max-w-screen-xl rounded-xl border border-neutral-300 bg-zinc-50 px-1 py-2 lg:p-4'>
+        <div className='relative flex items-center justify-center'>
+          <div className='absolute left-0 top-0 flex items-center rounded-full border bg-yellow-200 p-2'>
             <MdNumbers />
             <p className='font-semibold'>{emlak.fKod}</p>
           </div>
           <div className='flex flex-col items-center gap-0.5'>
-            <p className='text-xl font-semibold'>{emlak.firma}</p>
+            <p className='text-md font-semibold md:text-lg lg:text-xl'>{emlak.firma}</p>
             <p className='text-sm font-medium'>{emlak.ad}</p>
           </div>
-          <AiOutlineLogout
-            className='cursor-pointer rounded-full border bg-yellow-200 p-2 text-black duration-300 hover:bg-black hover:text-white'
-            size='40'
+          <div
             onClick={() => {
               Cookies.remove('userToken');
               navigate('/hesap/giris');
             }}
-          />
+            className='absolute right-0 top-0 flex cursor-pointer items-center gap-1 rounded-full border bg-yellow-200 p-2 text-black duration-300 hover:bg-black hover:text-white'
+          >
+            <p className='text-sm'>Çıkış Yap</p>
+            <AiOutlineLogout className='hidden md:block' size={20} />
+          </div>
         </div>
 
         {selectScreen === 0 ? (
@@ -130,7 +147,10 @@ const Profilim = () => {
               <IoAddCircleOutline className='size-20 rounded-full duration-300 group-hover:text-black/50 md:size-32' />
               <p className='mt-2 text-center text-xl font-semibold'>Afiş Oluştur</p>
             </div>
-            <div className='group flex cursor-pointer flex-col items-center justify-center rounded-xl border bg-yellow-200 p-5 ring-2 ring-yellow-400 ring-offset-2 duration-300 hover:ring-4 hover:ring-black/20'>
+            <div
+              onClick={() => navigate('/sablonlar')}
+              className='group flex cursor-pointer flex-col items-center justify-center rounded-xl border bg-yellow-200 p-5 ring-2 ring-yellow-400 ring-offset-2 duration-300 hover:ring-4 hover:ring-black/20'
+            >
               <SiCanva className='size-20 rounded-full duration-300 group-hover:text-black/50 md:size-32' />
               <p className='mt-2 text-center text-xl font-semibold'>Şablonlara Git</p>
             </div>
@@ -204,7 +224,12 @@ const Profilim = () => {
         ) : selectScreen === 2 ? (
           <AfisOlustur loading={setLoading} screen={setSelectScreen} token={userToken} />
         ) : selectScreen === 3 ? (
-          <AfisDuzenle loading={setLoading} screen={setSelectScreen} token={userToken} />
+          <AfisDuzenle
+            slug={slug}
+            loading={setLoading}
+            screen={setSelectScreen}
+            token={userToken}
+          />
         ) : null}
       </div>
     </div>

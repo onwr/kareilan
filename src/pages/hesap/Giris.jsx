@@ -26,6 +26,7 @@ const Giris = () => {
       if (!getSnap.empty) {
         toast.success('Giriş başarılı.');
         Cookies.set('userToken', getSnap.docs[0].data().uid, { expires: 7 });
+        Cookies.set('slug', getSnap.docs[0].data().slug, { expires: 7 });
         setLoading(false);
         navigate('/hesap/panel');
       } else {

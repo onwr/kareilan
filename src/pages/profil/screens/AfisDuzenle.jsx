@@ -1,16 +1,37 @@
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { db } from 'src/db/Firebase';
 import scan from '../../../images/icons/scan.png';
 import QrScanner from 'react-qr-scanner';
+import emlakjet from '@images/icons/Emlakjet.svg';
+import sahibinden from '@images/icons/sahibinden.svg';
+import hepsiemlak from '@images/icons/hepsiemlak.svg';
+import zingat from '@images/icons/zingat.svg';
+import KW from '@images/icons/KW.svg';
+import Century21 from '@images/icons/century21.svg';
+import firmasite from '@images/icons/site.svg';
+import turyap from '@images/icons/turyap.png';
 
-const AfisDuzenle = ({ screen, token }) => {
+const firmalar = [
+  { name: 'Emlakjet', icon: emlakjet },
+  { name: 'Sahibinden', icon: sahibinden },
+  { name: 'Hepsi Emlak', icon: hepsiemlak },
+  { name: 'Zingat', icon: zingat },
+  { name: 'KW', icon: KW },
+  { name: 'Century21', icon: Century21 },
+  { name: 'Turyap', icon: turyap },
+  { name: 'Firma Sitesi', icon: firmasite },
+];
+
+const AfisDuzenle = ({ slug, screen, token }) => {
   const [afisLink, setAfisLink] = useState('');
   const [afisData, setAfisData] = useState({});
   const [veriGetirildi, setVeriGetirildi] = useState(false);
   const [docId, setDocId] = useState('');
   const [isScanning, setIsScanning] = useState(false);
+  const [facingMode, setFacingMode] = useState('environment');
+  const [selectedCompanies, setSelectedCompanies] = useState([]);
 
   const afisSorgula = async () => {
     if (!afisLink) {
@@ -19,7 +40,8 @@ const AfisDuzenle = ({ screen, token }) => {
     }
 
     try {
-      const parts = afisLink.replace('https://kareilan.com/', '').split('/');
+      const completeLink = `https://kareilan.com/${slug}/${afisLink}`;
+      const parts = completeLink.replace('https://kareilan.com/', '').split('/');
       if (parts.length < 2) {
         toast.error('Adres formatı hatalı!');
         return;
@@ -44,6 +66,24 @@ const AfisDuzenle = ({ screen, token }) => {
     }
   };
 
+  const handleCompanySelect = (company) => {
+    setSelectedCompanies((prev) => ({
+      ...prev,
+      [company]: !prev[company],
+    }));
+  };
+
+  const handleCompanyInputChange = (company, value) => {
+    setAfisData((prev) => ({
+      ...prev,
+      [company]: value,
+    }));
+  };
+
+  const toggleCamera = () => {
+    setFacingMode((prevMode) => (prevMode === 'environment' ? 'user' : 'environment'));
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setAfisData((prev) => ({
@@ -51,6 +91,21 @@ const AfisDuzenle = ({ screen, token }) => {
       [name]: value,
     }));
   };
+
+  useEffect(() => {
+    const handleBackButton = (e) => {
+      e.preventDefault();
+      if (screen !== 0) {
+        screen(0);
+      }
+    };
+
+    window.addEventListener('popstate', handleBackButton);
+
+    return () => {
+      window.removeEventListener('popstate', handleBackButton);
+    };
+  }, [screen]);
 
   const handleNestedInputChange = (e, key) => {
     const { name, value } = e.target;
@@ -108,7 +163,14 @@ const AfisDuzenle = ({ screen, token }) => {
               onError={handleError}
               onScan={handleScan}
               style={{ width: '100%', borderRadius: '10px' }}
+              facingMode={facingMode}
             />
+            <button
+              onClick={toggleCamera}
+              className='mt-4 w-full rounded-xl bg-yellow-500 p-3 font-semibold text-white hover:bg-yellow-700'
+            >
+              Kamera Modunu Değiştir
+            </button>
             <button
               onClick={() => setIsScanning(false)}
               className='mt-4 w-full rounded-xl bg-red-500 p-3 font-semibold text-white hover:bg-red-700'
@@ -130,75 +192,48 @@ const AfisDuzenle = ({ screen, token }) => {
                   placeholder='Afiş Başlığı'
                 />
               </label>
+              <label className='block'>
+                <span className='font-semibold'>Afiş Açıklaması</span>
+                <textarea
+                  type='text'
+                  name='aciklama'
+                  value={afisData.aciklama || ''}
+                  onChange={handleInputChange}
+                  className='w-full rounded border p-2 outline-none ring-yellow-300 duration-300 focus:ring-2'
+                  placeholder='Afiş Açıklaması'
+                />
+              </label>
+              <div className='grid grid-cols-2 gap-2 lg:grid-cols-4'>
+                {firmalar.map((firma) => (
+                  <div key={firma.name} className='mb-4'>
+                    <div className='flex items-center space-x-2'>
+                      <input
+                        type='checkbox'
+                        checked={selectedCompanies[firma.name] || false}
+                        onChange={() => handleCompanySelect(firma.name)}
+                      />
+                      <img src={firma.icon} alt={firma.name} className='h-8 w-8' />
+                      <span>{firma.name}</span>
+                    </div>
 
-              <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
-                <label className='block'>
-                  <span className='font-semibold'>Sahibinden Linki</span>
-                  <input
-                    type='text'
-                    name='hepsiemlak'
-                    value={afisData.sahibinden || ''}
-                    onChange={handleInputChange}
-                    className='w-full rounded border p-2 outline-none ring-yellow-300 duration-300 focus:ring-2'
-                    placeholder='Hepsiemlak Linki'
-                  />
-                </label>
-                <label className='block'>
-                  <span className='font-semibold'>Hepsiemlak Link</span>
-                  <input
-                    type='text'
-                    name='kurumsal'
-                    value={afisData.hepsiemlak || ''}
-                    onChange={handleInputChange}
-                    className='w-full rounded border p-2 outline-none ring-yellow-300 duration-300 focus:ring-2'
-                    placeholder='Kurumsal Link'
-                  />
-                </label>
-                <label className='block'>
-                  <span className='font-semibold'>Emlakjet Linki</span>
-                  <input
-                    name='emlakjet'
-                    value={afisData.emlakjet || ''}
-                    onChange={handleInputChange}
-                    className='w-full rounded border p-2 outline-none ring-yellow-300 duration-300 focus:ring-2'
-                    placeholder='Emlakjet Linki'
-                  />
-                </label>
-                <label className='block'>
-                  <span className='font-semibold'>Zingat Linki</span>
-                  <input
-                    name='emlakjet'
-                    value={afisData.zingat || ''}
-                    onChange={handleInputChange}
-                    className='w-full rounded border p-2 outline-none ring-yellow-300 duration-300 focus:ring-2'
-                    placeholder='Zingat Linki'
-                  />
-                </label>
-                <label className='block'>
-                  <span className='font-semibold'>Kurumsal Link</span>
-                  <input
-                    name='emlakjet'
-                    value={afisData.kurumsal || ''}
-                    onChange={handleInputChange}
-                    className='w-full rounded border p-2 outline-none ring-yellow-300 duration-300 focus:ring-2'
-                    placeholder='Emlakjet Linki'
-                  />
-                </label>
-                <label className='block'>
-                  <span className='font-semibold'>Firma İlan</span>
-                  <input
-                    name='emlakjet'
-                    value={afisData.firmaLink || ''}
-                    onChange={handleInputChange}
-                    className='w-full rounded border p-2 outline-none ring-yellow-300 duration-300 focus:ring-2'
-                    placeholder='Zingat Linki'
-                  />
-                </label>
+                    {selectedCompanies[firma.name] && (
+                      <div className='mt-2'>
+                        <input
+                          type='text'
+                          placeholder={`${firma.name} linki`}
+                          value={afisData[firma.name] || ''}
+                          onChange={(e) => handleCompanyInputChange(firma.name, e.target.value)}
+                          className='w-full rounded border p-2 outline-none ring-yellow-300 duration-300 focus:ring-2'
+                        />
+                      </div>
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
-            <div className='space-y-4'>
+            <div className='space-y-1'>
               <p className='font-semibold'>İletişim Bilgileri</p>
-              <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
+              <div className='grid grid-cols-3 gap-1'>
                 <label className='block'>
                   <span>WhatsApp</span>
                   <input
@@ -221,7 +256,7 @@ const AfisDuzenle = ({ screen, token }) => {
                     placeholder='Telefon'
                   />
                 </label>
-                <label className='block md:col-span-2'>
+                <label className='block'>
                   <span>Email</span>
                   <input
                     type='email'
@@ -270,13 +305,18 @@ const AfisDuzenle = ({ screen, token }) => {
               <p className='text-xs'>
                 Örneğin <span className='text-red-500'>https://kareilan.com/kurkayaemlak/001</span>
               </p>
-              <input
-                type='text'
-                value={afisLink}
-                onChange={(e) => setAfisLink(e.target.value)}
-                className='mt-2 w-full rounded-md border border-gray-300 px-3 py-2 text-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-300'
-                placeholder='Afiş Adresi'
-              />
+              <div className='mt-1 flex items-center'>
+                <span className='text-gray-500'>https://kareilan.com/{slug}/</span>
+                <input
+                  autoFocus
+                  type='text'
+                  value={afisLink}
+                  onChange={(e) => setAfisLink(e.target.value)}
+                  maxLength={3}
+                  className='ml-2 w-16 rounded-md border border-gray-300 px-3 py-1 text-center text-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-300'
+                  placeholder='001'
+                />
+              </div>
               <button
                 onClick={afisSorgula}
                 className='mt-2 w-full rounded-xl border border-black/30 bg-yellow-200 p-2 duration-300 hover:bg-yellow-400'

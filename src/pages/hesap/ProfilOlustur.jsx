@@ -54,7 +54,7 @@ const Giris = () => {
       return;
     }
 
-    if (!email || !ad || !firma || !gsm || !ymmNo || !sifre || !slug) {
+    if (!email || !ad || !firma || !gsm || !sifre || !slug) {
       toast.error('Lütfen tüm alanları doldurunuz');
       setLoading(false);
       return;
@@ -112,8 +112,8 @@ const Giris = () => {
         className='absolute right-0 top-0 h-full w-full flex-none opacity-5'
         alt='Emlak Arka Planı'
       />
-      <div className='flex w-full flex-col items-center justify-center gap-3 bg-black'>
-        <img src={logo} alt='Logo' className='w-32' />
+      <div className='flex w-full flex-col items-center justify-center gap-3 bg-black pt-2 md:pt-0'>
+        <img src={logo} alt='Logo' className='w-24 md:w-32' />
         <div className='flex w-full flex-col items-center gap-1 pb-20'>
           <p className='text-3xl font-semibold text-yellow-500'>Üyelik</p>
           <p className='text-md font-medium text-gray-400'>Hesap Oluştur</p>
@@ -172,7 +172,7 @@ const Giris = () => {
                 placeholder='Şifre'
                 className='w-80 rounded-lg border border-yellow-500 bg-gray-900 p-2 text-center text-neutral-300 outline-none ring-yellow-600 duration-300 focus:ring-2'
               />
-              <div className='col-span-2'>
+              <div className='lg:col-span-2'>
                 <input
                   name='slug'
                   value={formData.slug}
@@ -194,7 +194,6 @@ const Giris = () => {
               </button>
             </div>
           </form>
-          <img src={logo2} alt='Kürkaya Yazılım' className='absolute bottom-5 w-24' />
         </div>
       </div>
     </div>

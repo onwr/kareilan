@@ -11,6 +11,7 @@ import AfisIndir from './modals/AfisIndir';
 const AfisOlustur = ({ screen, token }) => {
   const [afisData, setAfisData] = useState({
     baslik: '',
+    aciklama: '',
     sahibinden: '',
     hepsiemlak: '',
     zingat: '',
@@ -67,6 +68,21 @@ const AfisOlustur = ({ screen, token }) => {
     };
     return platformPatterns[platform]?.test(url);
   };
+
+  useEffect(() => {
+    const handleBackButton = (e) => {
+      e.preventDefault();
+      if (screen !== 0) {
+        screen(0);
+      }
+    };
+
+    window.addEventListener('popstate', handleBackButton);
+
+    return () => {
+      window.removeEventListener('popstate', handleBackButton);
+    };
+  }, [screen]);
 
   const handleAfisOlustur = async (e) => {
     e.preventDefault();
@@ -128,6 +144,27 @@ const AfisOlustur = ({ screen, token }) => {
     }
   };
 
+  const kurumsalCheck = async () => {
+    try {
+      const docRef = doc(db, 'kullanicilar', token);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        const kurumsal = docSnap.data().kurumsal;
+        if (kurumsal) {
+          setShowModalYeniIletisim(true);
+        } else {
+          toast.error(
+            'Sadece kurumsal kullanıcılar afişe özel bilgi girebilir. Afişlerinizdeki bilgileri profil kısmından yönetebilirsiniz'
+          );
+        }
+      } else {
+        toast.error('Kurumsal üye olmanız gerekmektedir.');
+      }
+    } catch (error) {
+      console.error('Kurumsal bilgi çekme hatası:', error);
+    }
+  };
+
   return (
     <div>
       <motion.div
@@ -138,54 +175,59 @@ const AfisOlustur = ({ screen, token }) => {
         className='mt-5'
       >
         <h2 className='mb-4 text-xl font-semibold'>Afiş Oluştur</h2>
-        <form className='grid grid-cols-2 gap-4'>
-          <textarea
+        <form className='flex flex-col items-center gap-2'>
+          <input
             name='baslik'
             placeholder='İlan Başlığı'
-            className='col-span-2 rounded border p-2 outline-none ring-yellow-300 duration-300 focus:ring-2'
+            className='w-full rounded border p-2 outline-none ring-yellow-300 duration-300 focus:ring-2'
             value={afisData.baslik}
             onChange={handleChange}
           />
-          <div className='col-span-2 grid grid-cols-2 gap-2'>
-            <input
-              type='text'
-              name='sahibinden'
-              placeholder='Sahibinden Linki'
-              className='rounded border p-2 outline-none ring-yellow-300 duration-300 focus:ring-2'
-              value={afisData.sahibinden}
-              onChange={handleChange}
-            />
-            <input
-              type='text'
-              name='hepsiemlak'
-              placeholder='Hepsiemlak Linki'
-              className='rounded border p-2 outline-none ring-yellow-300 duration-300 focus:ring-2'
-              value={afisData.hepsiemlak}
-              onChange={handleChange}
-            />
-            <input
-              type='text'
-              name='emlakjet'
-              placeholder='Emlakjet Linki'
-              className='rounded border p-2 outline-none ring-yellow-300 duration-300 focus:ring-2'
-              value={afisData.emlakjet}
-              onChange={handleChange}
-            />
-            <input
-              type='text'
-              name='zingat'
-              placeholder='Zingat Linki'
-              className='rounded border p-2 outline-none ring-yellow-300 duration-300 focus:ring-2'
-              value={afisData.zingat}
-              onChange={handleChange}
-            />
-            {error && <p className='text-red-500'>{error}</p>}
-          </div>
+          <textarea
+            name='aciklama'
+            placeholder='İlan Açıklaması'
+            className='w-full rounded border p-2 outline-none ring-yellow-300 duration-300 focus:ring-2'
+            value={afisData.aciklama}
+            onChange={handleChange}
+          />
+          <input
+            type='text'
+            name='sahibinden'
+            placeholder='Sahibinden Linki'
+            className='w-full rounded border p-2 outline-none ring-yellow-300 duration-300 focus:ring-2'
+            value={afisData.sahibinden}
+            onChange={handleChange}
+          />
+          <input
+            type='text'
+            name='hepsiemlak'
+            placeholder='Hepsiemlak Linki'
+            className='w-full rounded border p-2 outline-none ring-yellow-300 duration-300 focus:ring-2'
+            value={afisData.hepsiemlak}
+            onChange={handleChange}
+          />
+          <input
+            type='text'
+            name='emlakjet'
+            placeholder='Emlakjet Linki'
+            className='w-full rounded border p-2 outline-none ring-yellow-300 duration-300 focus:ring-2'
+            value={afisData.emlakjet}
+            onChange={handleChange}
+          />
+          <input
+            type='text'
+            name='zingat'
+            placeholder='Zingat Linki'
+            className='w-full rounded border p-2 outline-none ring-yellow-300 duration-300 focus:ring-2'
+            value={afisData.zingat}
+            onChange={handleChange}
+          />
+          {error && <p className='text-red-500'>{error}</p>}
           <input
             type='text'
             name='kurumsal'
             placeholder='Kurumsal Web Sayfası Linki'
-            className='rounded border p-2 outline-none ring-yellow-300 duration-300 focus:ring-2'
+            className='w-full rounded border p-2 outline-none ring-yellow-300 duration-300 focus:ring-2'
             value={afisData.kurumsal}
             onChange={handleChange}
           />
@@ -193,11 +235,11 @@ const AfisOlustur = ({ screen, token }) => {
             type='text'
             name='firmaLink'
             placeholder='Firma Web Sayfası Linki'
-            className='rounded border p-2 outline-none ring-yellow-300 duration-300 focus:ring-2'
+            className='w-full rounded border p-2 outline-none ring-yellow-300 duration-300 focus:ring-2'
             value={afisData.firmaLink}
             onChange={handleChange}
           />
-          <div className='col-span-2'>
+          <div className='w-full'>
             <p className='my-1 text-center text-xl font-semibold'>İletişim Bilgileri</p>
             <div className='mt-2 grid grid-cols-3 items-center justify-center gap-2 lg:flex'>
               <button
@@ -209,7 +251,7 @@ const AfisOlustur = ({ screen, token }) => {
               </button>
               <button
                 type='button'
-                onClick={() => setShowModalYeniIletisim(true)}
+                onClick={() => kurumsalCheck()}
                 className='col-span-1 rounded-lg border-2 border-yellow-400 py-2 text-xs font-medium duration-300 hover:bg-yellow-100 md:px-5 md:text-base'
               >
                 Yeni Bilgi Gir
@@ -232,14 +274,14 @@ const AfisOlustur = ({ screen, token }) => {
           <button
             type='submit'
             onClick={handleAfisOlustur}
-            className='rounded bg-yellow-400 p-3 font-semibold text-black duration-300 hover:bg-yellow-500'
+            className='w-full rounded bg-yellow-400 p-3 font-semibold text-black duration-300 hover:bg-yellow-500'
           >
             Afişi Oluştur
           </button>
           <button
             type='button'
             onClick={() => screen(0)}
-            className='rounded bg-black/50 p-3 font-semibold text-white duration-300 hover:bg-black/60'
+            className='w-full rounded bg-black/50 p-3 font-semibold text-white duration-300 hover:bg-black/60'
           >
             Geri Dön
           </button>
