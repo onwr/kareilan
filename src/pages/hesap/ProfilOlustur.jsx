@@ -18,6 +18,7 @@ const Giris = () => {
     email: '',
     ymmNo: '',
     sifre: '',
+    slug: '',
   });
   const [loading, setLoading] = useState(false);
 
@@ -45,7 +46,7 @@ const Giris = () => {
     e.preventDefault();
     setLoading(true);
 
-    const { email, ad, firma, gsm, ymmNo, sifre } = formData;
+    const { email, ad, firma, gsm, ymmNo, sifre, slug } = formData;
 
     if (sifre.length < 6) {
       toast.error('Şifreniz en az 6 karakter olmalıdır');
@@ -53,7 +54,7 @@ const Giris = () => {
       return;
     }
 
-    if (!email || !ad || !firma || !gsm || !ymmNo || !sifre) {
+    if (!email || !ad || !firma || !gsm || !ymmNo || !sifre || !slug) {
       toast.error('Lütfen tüm alanları doldurunuz');
       setLoading(false);
       return;
@@ -81,6 +82,7 @@ const Giris = () => {
         sifre,
         uid: userId,
         fKod: randomKod,
+        slug,
         olusturmaTarih: new Date().toISOString(),
       });
 
@@ -170,9 +172,23 @@ const Giris = () => {
                 placeholder='Şifre'
                 className='w-80 rounded-lg border border-yellow-500 bg-gray-900 p-2 text-center text-neutral-300 outline-none ring-yellow-600 duration-300 focus:ring-2'
               />
+              <div className='col-span-2'>
+                <input
+                  name='slug'
+                  value={formData.slug}
+                  onChange={handleChange}
+                  type='text'
+                  maxLength={20}
+                  placeholder='Web Adresi'
+                  className='w-full rounded-lg border border-yellow-500 bg-gray-900 p-2 text-center text-neutral-300 outline-none ring-yellow-600 duration-300 focus:ring-2'
+                />
+                <p className='mt-1.5 text-center text-white'>
+                  https://www.kareilan.com/<span className='text-yellow-400'>{formData.slug}</span>
+                </p>
+              </div>
               <button
                 type='submit'
-                className='mt-2 rounded-xl bg-yellow-300 py-2 font-semibold text-black md:col-span-2'
+                className='rounded-xl bg-yellow-300 py-2 font-semibold text-black md:col-span-2'
               >
                 Hesap Oluştur
               </button>

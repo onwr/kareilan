@@ -1,6 +1,6 @@
-import { doc, getDoc } from 'firebase/firestore';
+import { addDoc, collection, doc, getDoc, getDocs, setDoc, Timestamp } from 'firebase/firestore';
 import { motion } from 'framer-motion';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { SiCanva } from 'react-icons/si';
 import { db } from 'src/db/Firebase';
@@ -22,7 +22,24 @@ const AfisOlustur = ({ screen, token }) => {
   const [error, setError] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [showModalYeniIletisim, setShowModalYeniIletisim] = useState(false);
-  const [afisOlusturModal, setAfisOlusturModal] = useState(true);
+  const [afisOlusturModal, setAfisOlusturModal] = useState(false);
+  const [ilanSayisi, setIlanSayisi] = useState('');
+
+  useEffect(() => {
+    const fetchIlanSayisi = async () => {
+      try {
+        const ilanRef = collection(doc(db, 'kullanicilar', token), 'ilan');
+        const snapshot = await getDocs(ilanRef);
+
+        const ilanSayisi = snapshot.size;
+        setIlanSayisi('00' + (ilanSayisi + 1));
+      } catch (error) {
+        toast.error('İlan sayısı alınamadı.');
+      }
+    };
+
+    fetchIlanSayisi();
+  }, [token]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -38,6 +55,7 @@ const AfisOlustur = ({ screen, token }) => {
   const onCloseModal = () => {
     setShowModal(false);
     setShowModalYeniIletisim(false);
+    setAfisOlusturModal(false);
   };
 
   const validateUrl = (url, platform) => {
@@ -46,14 +64,6 @@ const AfisOlustur = ({ screen, token }) => {
       hepsiemlak: /^https:\/\/(www\.)?hepsiemlak\.com\/.+$/,
       zingat: /^https:\/\/(www\.)?zingat\.com\/.+$/,
       emlakjet: /^https:\/\/(www\.)?emlakjet\.com\/.+$/,
-      turyap: /^https:\/\/(www\.)?turyap\.com\.tr\/Portfoy_Bilgileri\.aspx\?ProductID=\d+$/,
-      remax: /^https:\/\/(www\.)?remax\.com\.tr\/portfoy\/P\d+$/,
-      century21: /^https:\/\/(www\.)?century21\.com\.tr\/tr-TR\/Stocks\/Detail\/.+$/,
-      kw: /^https:\/\/(www\.)?kw\.com\/tr\/property\/.+$/,
-      coldwellBanker: /^https:\/\/(www\.)?cb\.com\.tr\/tr-tr\/Stocks\/Detail\/.+$/,
-      premar: /^https:\/\/(www\.)?premar\.com\.tr\/ilan\/.+$/,
-      firmaLink:
-        /^https:\/\/(www\.)?(premar\.com\.tr|cb\.com\.tr|kw\.com|century21\.com\.tr|remax\.com\.tr|turyap\.com\.tr)\/.+$/,
     };
     return platformPatterns[platform]?.test(url);
   };
@@ -78,39 +88,24 @@ const AfisOlustur = ({ screen, token }) => {
         setError('Geçersiz Emlakjet URLsi.');
         return;
       }
-      if (!validateUrl(afisData.turyap, 'turyap')) {
-        setError('Geçersiz Turyap URLsi.');
-        return;
-      }
-      if (!validateUrl(afisData.remax, 'remax')) {
-        setError('Geçersiz Remax URLsi.');
-        return;
-      }
-      if (!validateUrl(afisData.century21, 'century21')) {
-        setError('Geçersiz Century21 URLsi.');
-        return;
-      }
-      if (!validateUrl(afisData.kw, 'kw')) {
-        setError('Geçersiz Keller Williams URLsi.');
-        return;
-      }
-      if (!validateUrl(afisData.coldwellBanker, 'coldwellBanker')) {
-        setError('Geçersiz Coldwell Banker URLsi.');
-        return;
-      }
-      if (!validateUrl(afisData.premar, 'premar')) {
-        setError('Geçersiz Premar URLsi.');
-        return;
-      }
-      if (!validateUrl(afisData.firmaLink, 'firmaLink')) {
-        setError(
-          'Geçersiz Firma Web Sayfası Linki. Yalnızca belirli kurumsal sitelere izin veriliyor.'
-        );
-        return;
-      }
       setError('');
-      toast.success('Oluşturuluyor.');
+
+      const ilanRef = collection(doc(db, 'kullanicilar', token), 'ilan');
+
+      const yeniIlanId = ilanSayisi.toString().padStart(3, '0');
+
+      const ilanData = {
+        ...afisData,
+        olusturmaTarih: Timestamp.now(),
+        docId: yeniIlanId,
+      };
+
+      const docRef = doc(ilanRef, yeniIlanId);
+      await setDoc(docRef, ilanData);
+
+      toast.success('Afiş oluşturuldu.');
     } catch (error) {
+      console.error('Afiş oluşturulurken hata oluştu:', error);
       toast.error('Lütfen daha sonra tekrar deneyiniz.');
     }
   };
@@ -221,6 +216,7 @@ const AfisOlustur = ({ screen, token }) => {
               </button>
               <button
                 type='button'
+                onClick={() => setAfisOlusturModal(true)}
                 className='col-span-3 rounded-lg border-2 border-yellow-400 px-2 py-2 text-xs font-medium duration-300 hover:bg-yellow-100 md:px-5 md:text-base'
               >
                 Afişi İndir
@@ -253,7 +249,7 @@ const AfisOlustur = ({ screen, token }) => {
       {showModalYeniIletisim && (
         <YeniIletisimModal onClose={onCloseModal} onSave={handleYeniIletisimEkle} />
       )}
-      {afisOlusturModal && <AfisIndir />}
+      {afisOlusturModal && <AfisIndir onClose={onCloseModal} />}
     </div>
   );
 };

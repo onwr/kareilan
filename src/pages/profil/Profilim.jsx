@@ -15,6 +15,7 @@ import { FaUser } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import AfisOlustur from './screens/AfisOlustur';
+import AfisDuzenle from './screens/AfisDuzenle';
 
 const Profilim = () => {
   const [loading, setLoading] = useState(false);
@@ -115,7 +116,10 @@ const Profilim = () => {
               <FaUser className='size-20 rounded-full duration-300 group-hover:text-black/50 md:size-32' />
               <p className='mt-2 text-center text-xl font-semibold'>Profil</p>
             </div>
-            <div className='group flex cursor-pointer flex-col items-center justify-center rounded-xl border bg-yellow-200 p-5 ring-2 ring-yellow-400 ring-offset-2 duration-300 hover:ring-4 hover:ring-black/20'>
+            <div
+              onClick={() => setSelectScreen(3)}
+              className='group flex cursor-pointer flex-col items-center justify-center rounded-xl border bg-yellow-200 p-5 ring-2 ring-yellow-400 ring-offset-2 duration-300 hover:ring-4 hover:ring-black/20'
+            >
               <MdModeEdit className='size-20 rounded-full duration-300 group-hover:text-black/50' />
               <p className='mt-2 text-center text-xl font-semibold'>Afiş Düzenle</p>
             </div>
@@ -199,6 +203,8 @@ const Profilim = () => {
           </motion.div>
         ) : selectScreen === 2 ? (
           <AfisOlustur loading={setLoading} screen={setSelectScreen} token={userToken} />
+        ) : selectScreen === 3 ? (
+          <AfisDuzenle loading={setLoading} screen={setSelectScreen} token={userToken} />
         ) : null}
       </div>
     </div>

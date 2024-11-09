@@ -3,30 +3,30 @@ import { QRCodeCanvas } from 'qrcode.react';
 import baski from '@images/baski.svg';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import { IoCloseCircleOutline } from 'react-icons/io5';
 
-const AfisIndir = () => {
+const AfisIndir = ({ onClose }) => {
   const ilanURL = 'https://kareilan.com/ilan/kurkayaemlak/001';
 
   const downloadPDF = () => {
-    const pdf = new jsPDF('p', 'pt', 'a0'); // A0 boyutunda PDF
+    const pdf = new jsPDF('p', 'pt', 'a0');
     const content = document.getElementById('afis-content');
 
     html2canvas(content, { scale: 3 }).then((canvas) => {
-      // DPI'yi artırmak için ölçeği yükselttik
       const imgData = canvas.toDataURL('image/png');
-      const imgWidth = 2383.94; // A0 boyutuna uygun genişlik (pt cinsinden, yaklaşık 841 mm)
-      const imgHeight = (canvas.height * imgWidth) / canvas.width; // Orantılı yükseklik hesaplama
+      const imgWidth = 2383.94;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
       let heightLeft = imgHeight;
 
       let position = 0;
 
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight); // Sol boşluğu kaldırdık
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
       heightLeft -= pdf.internal.pageSize.height;
 
       while (heightLeft >= 0) {
         position = heightLeft - imgHeight;
         pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight); // Sol boşluğu kaldırdık
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
         heightLeft -= pdf.internal.pageSize.height;
       }
 
@@ -36,15 +36,12 @@ const AfisIndir = () => {
 
   const downloadImage = () => {
     html2canvas(document.getElementById('afis-content'), { scale: 3 }).then((canvas) => {
-      // DPI'yi artırmak için ölçeği yükselttik
       const link = document.createElement('a');
       const imgData = canvas.toDataURL('image/png');
 
-      // A0 boyutlarına uygun resim ayarları
-      const imgWidth = 2383.94; // A0 boyutuna uygun genişlik (pt cinsinden)
-      const imgHeight = (canvas.height * imgWidth) / canvas.width; // Orantılı yükseklik hesaplama
+      const imgWidth = 2383.94;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-      // Yeni bir canvas oluşturup yüksek kaliteli resmi oraya yerleştiriyoruz
       const resizedCanvas = document.createElement('canvas');
       resizedCanvas.width = imgWidth;
       resizedCanvas.height = imgHeight;
@@ -58,9 +55,16 @@ const AfisIndir = () => {
     });
   };
 
+  // Afiş boyutu resmi kapsayan divin boyutu ile alakalı
+
   return (
     <div className='absolute inset-0 right-0 top-0 flex min-h-screen items-center justify-center bg-black bg-opacity-50 px-1'>
       <div className='relative z-50 w-full max-w-xl rounded-lg bg-white p-4'>
+        <IoCloseCircleOutline
+          onClick={() => onClose()}
+          size={28}
+          className='absolute right-4 top-4 cursor-pointer duration-300 hover:text-gray-600'
+        />
         <p className='text-center text-xl font-semibold text-black'>Afişi İndir</p>
         <hr className='my-2' />
         <div id='afis-content' className='relative hidden justify-center md:flex'>
