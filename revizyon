@@ -1,6 +1,4 @@
-1. si herhangi bir alt alana girdiğimizde  geri tuşuna basınca siteden çıkılıyor ve tekrar girmek zorunda kalınıyor.  geri tuşuyla önceki işleme dönmeyi sağlayabilir miyiz.
-2. Afiş düzenle de tarayıcı ön kamerayı açıyor
-3. Afiş düzenlede Afiş adresinde tüm adresi değil zaten kullanıcı belli son 3 rakamı girse yeterli. Böylesi kolay olacak
-4. Afiş Oluştur kısmında da size yolladığım ikonlarla firma logolarını koyup üstüne tıklandığında linkleri girelim. Bu linkler için de sahibinden sitesindeki gibi giriş kısıtları olmalı. Bu ikon ve kısıtlarını biz yönetici panelinden ekleyebilmeliyiz. 
-5. Yeni bilgi gir kısmı da sadece bizim kurumsal kullanıcı olarak tanımladığımız müşteriler tarafından kullanılabilmeli. Kurumsal müşterileri biz kendi panelimizden tanımlayabilmeliyiz. 
-6. Bir de afiş oluştur sayfasında da her kutuyu diğer sayfalardaki gibi tek satır yapabilir miyiz. 
+Salih Bey iyi akşamlar şimdi baktım bir iki firma eksiğimiz var Remax Premar RealtyWorıd  bir de sıralamayı size söyleyeceğim onu değiştirmenizi isteyeceğim.
+Bir de aşağıdaki bilgilerde firma adı (Bu değiştirilemeyecek ) ve müşteri adı da çıkarsa burada her şey tam istediğimiz gibi olacak. Sanırım iletişim
+bilgilerini güncelle dediğimizde kurumsal olmayan müşterilerde bahsettiğimiz pop-up mesajı çıkacak firma adı hariç diğer bilgileri kurumsal müşteriler
+güncelleyebilecek bireysel müşteriler değişiklik yapamıyack.

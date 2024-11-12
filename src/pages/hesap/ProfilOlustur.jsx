@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import logo from '@images/logo.png';
 import emlak from '@images/emlak.jpg';
-import logo2 from '@images/logo2.png';
 import { auth, db } from '../../db/Firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, setDoc, Timestamp } from 'firebase/firestore';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import Loader from 'src/layout/Loader';
@@ -19,6 +18,7 @@ const Giris = () => {
     ymmNo: '',
     sifre: '',
     slug: '',
+    kurumsal: false,
   });
   const [loading, setLoading] = useState(false);
 
@@ -42,11 +42,12 @@ const Giris = () => {
     }
   };
 
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
-    const { email, ad, firma, gsm, ymmNo, sifre, slug } = formData;
+    const { email, ad, firma, gsm, ymmNo, sifre, slug, kurumsal } = formData;
 
     if (sifre.length < 6) {
       toast.error('Şifreniz en az 6 karakter olmalıdır');
@@ -69,7 +70,6 @@ const Giris = () => {
 
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, sifre);
-
       const userId = userCredential.user.uid;
       const randomKod = Math.floor(10000 + Math.random() * 90000);
 
@@ -82,8 +82,21 @@ const Giris = () => {
         sifre,
         uid: userId,
         fKod: randomKod,
+        afisSinir: 20,
         slug,
+        kurumsal,
+        admin: false,
+        durum: true,
         olusturmaTarih: new Date().toISOString(),
+      });
+
+      const bugun = Timestamp.now();
+
+      const bitisTarih = Timestamp.fromMillis(bugun.toMillis() + 600 * 24 * 60 * 60 * 1000);
+
+      await setDoc(doc(db, `kullanicilar/${userId}/ilan`, '000'), {
+        olusturmaTarih: bugun,
+        bitisTarih,
       });
 
       toast.success('Kayıt başarılı. Yönlendiriliyorsunuz...');
@@ -98,8 +111,11 @@ const Giris = () => {
       } else {
         toast.error('Kayıt başarısız oldu. Daha sonra tekrar deneyiniz');
         setLoading(false);
+        console.log(error);
+
         return;
       }
+      console.log(error);
     }
   };
 

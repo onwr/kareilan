@@ -1,39 +1,48 @@
-import { addDoc, collection, doc, getDoc, getDocs, setDoc, Timestamp } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, setDoc, Timestamp } from 'firebase/firestore';
 import { motion } from 'framer-motion';
 import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
-import { SiCanva } from 'react-icons/si';
 import { db } from 'src/db/Firebase';
-import IletisimBilgi from './modals/IletisimBilgi';
-import YeniIletisimModal from './modals/YeniIletisim';
-import AfisIndir from './modals/AfisIndir';
+import { CiCirclePlus } from 'react-icons/ci';
+import OdemeModal from 'src/modals/odemeModal';
 
 const AfisOlustur = ({ screen, token }) => {
-  const [afisData, setAfisData] = useState({
-    baslik: '',
-    aciklama: '',
-    sahibinden: '',
-    hepsiemlak: '',
-    zingat: '',
-    emlakjet: '',
-    kurumsal: '',
-    firmaLink: '',
-    iletisimBilgi: {},
-  });
-  const [error, setError] = useState('');
+  const [afisData, setAfisData] = useState({ iletisimBilgi: {} });
+  const [ilanSayisi, setIlanSayisi] = useState(0);
+  const [kurumsalUye, setKurumsalUye] = useState(false);
+  const [maxAfisLimit, setMaxAfisLimit] = useState(0);
   const [showModal, setShowModal] = useState(false);
-  const [showModalYeniIletisim, setShowModalYeniIletisim] = useState(false);
-  const [afisOlusturModal, setAfisOlusturModal] = useState(false);
-  const [ilanSayisi, setIlanSayisi] = useState('');
+
+  useEffect(() => {
+    const kurumsalCheck = async () => {
+      try {
+        const docRef = doc(db, 'kullanicilar', token);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          setMaxAfisLimit(data.afisSinir);
+          setAfisData((prevData) => ({
+            ...prevData,
+            iletisimBilgi: { telefon: data.gsm, email: data.email },
+          }));
+          setKurumsalUye(docSnap.data().kurumsal);
+        } else {
+          toast.error('Kurumsal üye olmanız gerekmektedir.');
+        }
+      } catch (error) {
+        console.error('Kurumsal bilgi çekme hatası:', error);
+      }
+    };
+
+    kurumsalCheck();
+  }, []);
 
   useEffect(() => {
     const fetchIlanSayisi = async () => {
       try {
         const ilanRef = collection(doc(db, 'kullanicilar', token), 'ilan');
         const snapshot = await getDocs(ilanRef);
-
-        const ilanSayisi = snapshot.size;
-        setIlanSayisi('00' + (ilanSayisi + 1));
+        setIlanSayisi(snapshot.size);
       } catch (error) {
         toast.error('İlan sayısı alınamadı.');
       }
@@ -42,126 +51,42 @@ const AfisOlustur = ({ screen, token }) => {
     fetchIlanSayisi();
   }, [token]);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setAfisData({ ...afisData, [name]: value });
-  };
+  const handleAfisOlustur = async (adet) => {
+    const kalanHak = maxAfisLimit - ilanSayisi;
+    const olusturulacakAdet = adet > kalanHak ? kalanHak : adet;
 
-  const handleYeniIletisimEkle = (contanctInfo) => {
-    setAfisData((prevData) => ({ ...prevData, iletisimBilgi: contanctInfo }));
-    toast.success('Yeni iletişim bilgileri eklendi.');
-    setShowModalYeniIletisim(false);
-  };
-
-  const onCloseModal = () => {
-    setShowModal(false);
-    setShowModalYeniIletisim(false);
-    setAfisOlusturModal(false);
-  };
-
-  const validateUrl = (url, platform) => {
-    const platformPatterns = {
-      sahibinden: /^https:\/\/(www\.)?(sahibinden\.com|shbd\.io)\/.+$/,
-      hepsiemlak: /^https:\/\/(www\.)?hepsiemlak\.com\/.+$/,
-      zingat: /^https:\/\/(www\.)?zingat\.com\/.+$/,
-      emlakjet: /^https:\/\/(www\.)?emlakjet\.com\/.+$/,
-    };
-    return platformPatterns[platform]?.test(url);
-  };
-
-  useEffect(() => {
-    const handleBackButton = (e) => {
-      e.preventDefault();
-      if (screen !== 0) {
-        screen(0);
-      }
-    };
-
-    window.addEventListener('popstate', handleBackButton);
-
-    return () => {
-      window.removeEventListener('popstate', handleBackButton);
-    };
-  }, [screen]);
-
-  const handleAfisOlustur = async (e) => {
-    e.preventDefault();
+    if (olusturulacakAdet <= 0) {
+      toast.error('Maksimum afiş limitine ulaştınız.');
+      return;
+    }
 
     try {
-      if (!validateUrl(afisData.sahibinden, 'sahibinden')) {
-        setError('Geçersiz Sahibinden URLsi.');
-        return;
-      }
-      if (!validateUrl(afisData.hepsiemlak, 'hepsiemlak')) {
-        setError('Geçersiz Hepsiemlak URLsi.');
-        return;
-      }
-      if (!validateUrl(afisData.zingat, 'zingat')) {
-        setError('Geçersiz Zingat URLsi.');
-        return;
-      }
-      if (!validateUrl(afisData.emlakjet, 'emlakjet')) {
-        setError('Geçersiz Emlakjet URLsi.');
-        return;
-      }
-      setError('');
-
       const ilanRef = collection(doc(db, 'kullanicilar', token), 'ilan');
+      for (let i = 0; i < olusturulacakAdet; i++) {
+        const yeniIlanId = String(ilanSayisi + i + 1).padStart(3, '0');
 
-      const yeniIlanId = ilanSayisi.toString().padStart(3, '0');
+        const olusturmaTarih = Timestamp.now();
 
-      const ilanData = {
-        ...afisData,
-        olusturmaTarih: Timestamp.now(),
-        docId: yeniIlanId,
-      };
+        const bitisTarih = Timestamp.fromMillis(
+          olusturmaTarih.toMillis() + 7 * 24 * 60 * 60 * 1000
+        );
 
-      const docRef = doc(ilanRef, yeniIlanId);
-      await setDoc(docRef, ilanData);
+        const ilanData = {
+          ...afisData,
+          olusturmaTarih,
+          bitisTarih,
+          docId: yeniIlanId,
+        };
 
-      toast.success('Afiş oluşturuldu.');
+        const docRef = doc(ilanRef, yeniIlanId);
+        await setDoc(docRef, ilanData);
+      }
+
+      toast.success(`${olusturulacakAdet} adet afiş başarıyla oluşturuldu.`);
+      setIlanSayisi((prevCount) => prevCount + olusturulacakAdet);
     } catch (error) {
       console.error('Afiş oluşturulurken hata oluştu:', error);
       toast.error('Lütfen daha sonra tekrar deneyiniz.');
-    }
-  };
-
-  const mevcutBilgileriCek = async () => {
-    try {
-      const docRef = doc(db, 'kullanicilar', token);
-      const docSnap = await getDoc(docRef);
-
-      if (docSnap.exists() && docSnap.data().mevcutBilgi) {
-        const mevcutBilgi = docSnap.data().mevcutBilgi;
-        setAfisData((prevData) => ({ ...prevData, iletisimBilgi: mevcutBilgi }));
-        toast.success('Mevcut iletişim bilgileri eklendi.');
-        console.log('Mevcut bilgi bulundu:', mevcutBilgi);
-      } else {
-        toast.error('Bilgiler bulunamadı.');
-      }
-    } catch (error) {
-      console.error('Bilgi çekme hatası:', error);
-    }
-  };
-
-  const kurumsalCheck = async () => {
-    try {
-      const docRef = doc(db, 'kullanicilar', token);
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        const kurumsal = docSnap.data().kurumsal;
-        if (kurumsal) {
-          setShowModalYeniIletisim(true);
-        } else {
-          toast.error(
-            'Sadece kurumsal kullanıcılar afişe özel bilgi girebilir. Afişlerinizdeki bilgileri profil kısmından yönetebilirsiniz'
-          );
-        }
-      } else {
-        toast.error('Kurumsal üye olmanız gerekmektedir.');
-      }
-    } catch (error) {
-      console.error('Kurumsal bilgi çekme hatası:', error);
     }
   };
 
@@ -174,124 +99,61 @@ const AfisOlustur = ({ screen, token }) => {
         transition={{ duration: 0.5 }}
         className='mt-5'
       >
-        <h2 className='mb-4 text-xl font-semibold'>Afiş Oluştur</h2>
-        <form className='flex flex-col items-center gap-2'>
-          <input
-            name='baslik'
-            placeholder='İlan Başlığı'
-            className='w-full rounded border p-2 outline-none ring-yellow-300 duration-300 focus:ring-2'
-            value={afisData.baslik}
-            onChange={handleChange}
-          />
-          <textarea
-            name='aciklama'
-            placeholder='İlan Açıklaması'
-            className='w-full rounded border p-2 outline-none ring-yellow-300 duration-300 focus:ring-2'
-            value={afisData.aciklama}
-            onChange={handleChange}
-          />
-          <input
-            type='text'
-            name='sahibinden'
-            placeholder='Sahibinden Linki'
-            className='w-full rounded border p-2 outline-none ring-yellow-300 duration-300 focus:ring-2'
-            value={afisData.sahibinden}
-            onChange={handleChange}
-          />
-          <input
-            type='text'
-            name='hepsiemlak'
-            placeholder='Hepsiemlak Linki'
-            className='w-full rounded border p-2 outline-none ring-yellow-300 duration-300 focus:ring-2'
-            value={afisData.hepsiemlak}
-            onChange={handleChange}
-          />
-          <input
-            type='text'
-            name='emlakjet'
-            placeholder='Emlakjet Linki'
-            className='w-full rounded border p-2 outline-none ring-yellow-300 duration-300 focus:ring-2'
-            value={afisData.emlakjet}
-            onChange={handleChange}
-          />
-          <input
-            type='text'
-            name='zingat'
-            placeholder='Zingat Linki'
-            className='w-full rounded border p-2 outline-none ring-yellow-300 duration-300 focus:ring-2'
-            value={afisData.zingat}
-            onChange={handleChange}
-          />
-          {error && <p className='text-red-500'>{error}</p>}
-          <input
-            type='text'
-            name='kurumsal'
-            placeholder='Kurumsal Web Sayfası Linki'
-            className='w-full rounded border p-2 outline-none ring-yellow-300 duration-300 focus:ring-2'
-            value={afisData.kurumsal}
-            onChange={handleChange}
-          />
-          <input
-            type='text'
-            name='firmaLink'
-            placeholder='Firma Web Sayfası Linki'
-            className='w-full rounded border p-2 outline-none ring-yellow-300 duration-300 focus:ring-2'
-            value={afisData.firmaLink}
-            onChange={handleChange}
-          />
-          <div className='w-full'>
-            <p className='my-1 text-center text-xl font-semibold'>İletişim Bilgileri</p>
-            <div className='mt-2 grid grid-cols-3 items-center justify-center gap-2 lg:flex'>
-              <button
-                type='button'
-                onClick={mevcutBilgileriCek}
-                className='col-span-2 rounded-lg border-2 border-yellow-400 px-2 py-2 text-xs font-medium duration-300 hover:bg-yellow-100 md:px-5 md:text-base'
-              >
-                Mevcudu Kullan
-              </button>
-              <button
-                type='button'
-                onClick={() => kurumsalCheck()}
-                className='col-span-1 rounded-lg border-2 border-yellow-400 py-2 text-xs font-medium duration-300 hover:bg-yellow-100 md:px-5 md:text-base'
-              >
-                Yeni Bilgi Gir
-              </button>
-              <button
-                type='button'
-                onClick={() => setAfisOlusturModal(true)}
-                className='col-span-3 rounded-lg border-2 border-yellow-400 px-2 py-2 text-xs font-medium duration-300 hover:bg-yellow-100 md:px-5 md:text-base'
-              >
-                Afişi İndir
-              </button>
-              <button
-                type='button'
-                className='col-span-3 flex items-center justify-center gap-2 rounded-lg border-2 border-yellow-400 px-5 py-2 text-xs font-medium duration-300 hover:bg-yellow-100 md:text-base'
-              >
-                Şablonlara Git <SiCanva size='24' />
-              </button>
-            </div>
+        <h2 className='mb-2 text-xl font-semibold'>Afiş Oluştur</h2>
+        <p className='mb-2 rounded-xl bg-yellow-500/20 p-2 text-center'>
+          Kalan Afiş Hakkı <span className='font-bold'>{maxAfisLimit - ilanSayisi}</span>
+        </p>
+
+        <div className='mb-4'>
+          <p className='rounded-t-lg bg-green-200 py-2 text-center font-semibold shadow-2xl'>
+            Oluşturduğunuz afişlerin aktif kalabilmesi için 7 gün içerisinde ödeme yapmayı
+            unutmayınız.
+          </p>
+          <button
+            onClick={() => setShowModal(true)}
+            className='w-full rounded-b-lg border-b bg-yellow-100 py-2 font-bold shadow-inner duration-300 hover:bg-yellow-300'
+          >
+            Ödeme Yap
+          </button>
+        </div>
+
+        <p className='text-xl font-bold underline'>Bireysel Üyelik</p>
+        <div className='mt-2 flex flex-col items-center gap-2 md:flex-row'>
+          <div
+            className='group flex w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border bg-gradient-to-b from-amber-200 to-slate-50 p-12 ring-yellow-600 duration-300 hover:ring-1 md:w-auto'
+            onClick={() => handleAfisOlustur(5)}
+          >
+            <CiCirclePlus className='size-20 rounded-full duration-300 group-hover:bg-white/50' />
+            <p className='text-xl font-semibold'>5 Adet Afiş Oluştur</p>
           </div>
-          <button
-            type='submit'
-            onClick={handleAfisOlustur}
-            className='w-full rounded bg-yellow-400 p-3 font-semibold text-black duration-300 hover:bg-yellow-500'
+          <div
+            className='group flex w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border bg-gradient-to-b from-amber-200 to-slate-50 p-12 ring-yellow-600 duration-300 hover:ring-1 md:w-auto'
+            onClick={() => handleAfisOlustur(10)}
           >
-            Afişi Oluştur
-          </button>
-          <button
-            type='button'
-            onClick={() => screen(0)}
-            className='w-full rounded bg-black/50 p-3 font-semibold text-white duration-300 hover:bg-black/60'
+            <CiCirclePlus className='size-20 rounded-full duration-300 group-hover:bg-white/50' />
+            <p className='text-xl font-semibold'>10 Adet Afiş Oluştur</p>
+          </div>
+        </div>
+
+        <p className='mt-5 text-xl font-bold underline'>Kurumsal Üyelik</p>
+        <div className='mt-2 flex flex-col items-center gap-2 md:flex-row'>
+          <div
+            className='group flex w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border bg-gradient-to-b from-amber-200 to-slate-50 p-12 ring-yellow-600 duration-300 hover:ring-1 md:w-auto'
+            onClick={() => handleAfisOlustur(20)}
           >
-            Geri Dön
-          </button>
-        </form>
+            <CiCirclePlus className='size-20 rounded-full duration-300 group-hover:bg-white/50' />
+            <p className='text-xl font-semibold'>20 Adet Afiş Oluştur</p>
+          </div>
+        </div>
+
+        <button
+          onClick={() => screen(0)}
+          className='mt-5 w-full rounded-xl bg-black/40 py-2 font-semibold text-white duration-300 hover:bg-black/60'
+        >
+          Geri Dön
+        </button>
+        <OdemeModal isOpen={showModal} onClose={() => setShowModal(false)} />
       </motion.div>
-      {showModal && <IletisimBilgi token={token} onClose={onCloseModal} />}
-      {showModalYeniIletisim && (
-        <YeniIletisimModal onClose={onCloseModal} onSave={handleYeniIletisimEkle} />
-      )}
-      {afisOlusturModal && <AfisIndir onClose={onCloseModal} />}
     </div>
   );
 };
