@@ -23,6 +23,7 @@ const AfisOlustur = ({ screen, token }) => {
           setMaxAfisLimit(data.afisSinir);
           setAfisData((prevData) => ({
             ...prevData,
+            musteri: data.ad,
             iletisimBilgi: { telefon: data.gsm, email: data.email },
           }));
           setKurumsalUye(docSnap.data().kurumsal);
@@ -99,7 +100,7 @@ const AfisOlustur = ({ screen, token }) => {
         transition={{ duration: 0.5 }}
         className='mt-5'
       >
-        <h2 className='mb-2 text-xl font-semibold'>Afiş Oluştur</h2>
+        <h2 className='mb-2 text-xl font-semibold'>Afiş Satın Al</h2>
         <p className='mb-2 rounded-xl bg-yellow-500/20 p-2 text-center'>
           Kalan Afiş Hakkı <span className='font-bold'>{maxAfisLimit - ilanSayisi}</span>
         </p>

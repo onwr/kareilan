@@ -18,7 +18,7 @@ const AfisDuzenle = ({ slug, screen, token }) => {
   const [afisOlusturModal, setAfisOlusturModal] = useState(false);
   const [docId, setDocId] = useState('');
   const [isScanning, setIsScanning] = useState(false);
-  const [facingMode, setFacingMode] = useState('environment');
+  const [facingMode, setFacingMode] = useState('user');
   const [selectedCompanies, setSelectedCompanies] = useState([]);
   const [kurumsalMusteri, setKurumsalMusteri] = useState(false);
   const navigate = useNavigate();
@@ -410,14 +410,14 @@ const AfisDuzenle = ({ slug, screen, token }) => {
                   <p className='font-bold'>{firmaData.firma}</p>
                 </div>
                 <div className='flex w-full flex-col gap-0.5'>
-                  <p className='font-medium'>Müşteri Adı</p>
+                  <p className='font-medium'>Kullanıcı Adı</p>
                   <input
                     type='text'
                     name='musteri'
                     value={afisData.musteri || ''}
                     onChange={handleInputChange}
                     className='w-full rounded border p-2 outline-none ring-yellow-300 duration-300 focus:ring-2'
-                    placeholder='Müşteri Adı'
+                    placeholder='Kullanıcı Adı'
                   />
                 </div>
               </div>

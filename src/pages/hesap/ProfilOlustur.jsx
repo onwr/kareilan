@@ -3,13 +3,13 @@ import logo from '@images/logo.png';
 import emlak from '@images/emlak.jpg';
 import { auth, db } from '../../db/Firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { doc, setDoc, Timestamp } from 'firebase/firestore';
+import { collection, doc, getDocs, query, setDoc, Timestamp, where } from 'firebase/firestore';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import Loader from 'src/layout/Loader';
 import Cookies from 'js-cookie';
 
-const Giris = () => {
+const ProfilOlustur = () => {
   const [formData, setFormData] = useState({
     ad: '',
     firma: '',
@@ -30,10 +30,9 @@ const Giris = () => {
     if (name === 'gsm') {
       const cleanedValue = value.replace(/\D/g, '');
 
-      if (cleanedValue.length > 10) {
+      if (!/^5\d{0,9}$/.test(cleanedValue)) {
         return;
       }
-
       const formattedValue = cleanedValue.replace(/(\d{3})(\d{0,3})(\d{0,2})/, '($1) $2 $3').trim();
 
       setFormData({ ...formData, [name]: formattedValue });
@@ -41,7 +40,6 @@ const Giris = () => {
       setFormData({ ...formData, [name]: value });
     }
   };
-
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -69,6 +67,15 @@ const Giris = () => {
     }
 
     try {
+      const gsmQuery = query(collection(db, 'kullanicilar'), where('gsm', '==', gsm));
+      const gsmSnapshot = await getDocs(gsmQuery);
+
+      if (!gsmSnapshot.empty) {
+        toast.error('Bu telefon numarası zaten kayıtlı.');
+        setLoading(false);
+        return;
+      }
+
       const userCredential = await createUserWithEmailAndPassword(auth, email, sifre);
       const userId = userCredential.user.uid;
       const randomKod = Math.floor(10000 + Math.random() * 90000);
@@ -91,7 +98,6 @@ const Giris = () => {
       });
 
       const bugun = Timestamp.now();
-
       const bitisTarih = Timestamp.fromMillis(bugun.toMillis() + 600 * 24 * 60 * 60 * 1000);
 
       await setDoc(doc(db, `kullanicilar/${userId}/ilan`, '000'), {
@@ -106,15 +112,10 @@ const Giris = () => {
     } catch (error) {
       if (error.code === 'auth/email-already-in-use') {
         toast.error('Bu e-posta adresi zaten kullanımda.');
-        setLoading(false);
-        return;
       } else {
         toast.error('Kayıt başarısız oldu. Daha sonra tekrar deneyiniz');
-        setLoading(false);
-        console.log(error);
-
-        return;
       }
+      setLoading(false);
       console.log(error);
     }
   };
@@ -169,7 +170,7 @@ const Giris = () => {
                 value={formData.ymmNo}
                 onChange={handleChange}
                 type='text'
-                placeholder='YMM NO'
+                placeholder='MMY NO'
                 className='rounded-lg border border-yellow-500 bg-gray-900 p-2 text-center text-neutral-300 outline-none ring-yellow-600 duration-300 focus:ring-2'
               />
               <input
@@ -195,7 +196,7 @@ const Giris = () => {
                   onChange={handleChange}
                   type='text'
                   maxLength={20}
-                  placeholder='Web Adresi'
+                  placeholder='Kullanıcı Adı (Afiş adresinize eklenecek uzantı)'
                   className='w-full rounded-lg border border-yellow-500 bg-gray-900 p-2 text-center text-neutral-300 outline-none ring-yellow-600 duration-300 focus:ring-2'
                 />
                 <p className='mt-1.5 text-center text-white'>
@@ -216,4 +217,4 @@ const Giris = () => {
   );
 };
 
-export default Giris;
+export default ProfilOlustur;

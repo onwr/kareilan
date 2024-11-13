@@ -151,7 +151,7 @@ const Sablonlar = () => {
             <p>{item.aciklama}</p>
             <a
               className='w-full rounded-xl bg-yellow-300 py-2 text-center duration-300 hover:bg-yellow-400'
-              href={item.link}
+              href={item.adres}
             >
               Şablona Git
             </a>
@@ -186,7 +186,7 @@ const Sablonlar = () => {
             <p>{item.aciklama}</p>
             <a
               className='w-full rounded-xl bg-yellow-300 py-2 text-center duration-300 hover:bg-yellow-400'
-              href={item.link}
+              href={item.adres}
             >
               Şablona Git
             </a>
@@ -214,7 +214,7 @@ const Sablonlar = () => {
             <p>{item.aciklama}</p>
             <a
               className='w-full rounded-xl bg-yellow-300 py-2 text-center duration-300 hover:bg-yellow-400'
-              href={item.link}
+              href={item.adres}
             >
               Şablona Git
             </a>

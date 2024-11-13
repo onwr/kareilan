@@ -29,7 +29,7 @@ const AuthLayout = ({ children }) => {
       } catch (error) {
         console.error('Kullanıcı kontrol hatası:', error);
         toast.error('İşlem yapabilmek için lütfen giriş yapınız.');
-        navigate('/kullanici/giris');
+        navigate('/hesap/giris');
       }
     };
 

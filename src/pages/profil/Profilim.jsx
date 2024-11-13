@@ -145,7 +145,7 @@ const Profilim = () => {
               className='group flex cursor-pointer flex-col items-center justify-center rounded-xl border bg-yellow-200 p-5 ring-2 ring-yellow-400 ring-offset-2 duration-300 hover:ring-4 hover:ring-black/20'
             >
               <IoAddCircleOutline className='size-20 rounded-full duration-300 group-hover:text-black/50 md:size-32' />
-              <p className='mt-2 text-center text-xl font-semibold'>Afiş Oluştur</p>
+              <p className='mt-2 text-center text-xl font-semibold'>Afiş Satın Al</p>
             </div>
             <div
               onClick={() => navigate('/sablonlar')}

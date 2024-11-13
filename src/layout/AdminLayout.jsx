@@ -13,7 +13,7 @@ const AdminLayout = ({ children }) => {
 
     const checkUser = async () => {
       if (!userUID) {
-        navigate('/kullanici/giris');
+        navigate('/hesap/giris');
         return;
       }
 

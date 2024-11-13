@@ -3,6 +3,7 @@ import logo from '@images/logo.png';
 import { FaRightLong } from 'react-icons/fa6';
 import { IoGitNetworkSharp } from 'react-icons/io5';
 import { motion } from 'framer-motion';
+import { LuLogIn } from 'react-icons/lu';
 
 const Hero = () => {
   return (
@@ -37,6 +38,16 @@ const Hero = () => {
       </motion.p>
 
       <div className='mt-5 flex items-center gap-2'>
+        <motion.a
+          className='flex cursor-pointer items-center gap-3 rounded-lg bg-yellow-400 px-4 py-2 font-semibold text-black duration-300 hover:bg-yellow-500/80'
+          initial={{ opacity: 0, x: 0 }}
+          href='/hesap/giris'
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+        >
+          Giriş Yap
+          <LuLogIn />
+        </motion.a>
         <motion.a
           className='flex cursor-pointer items-center gap-3 rounded-lg bg-black px-4 py-2 font-semibold text-yellow-500 duration-300 hover:bg-black/80'
           initial={{ opacity: 0, x: 0 }}

@@ -55,8 +55,6 @@ const AfisIndir = ({ onClose }) => {
     });
   };
 
-  // Afiş boyutu resmi kapsayan divin boyutu ile alakalı
-
   return (
     <div className='absolute inset-0 right-0 top-0 flex min-h-screen items-center justify-center bg-black bg-opacity-50 px-1'>
       <div className='relative z-50 w-full max-w-xl rounded-lg bg-white p-4'>
@@ -115,6 +113,12 @@ const AfisIndir = ({ onClose }) => {
             onClick={downloadImage}
           >
             Resim Olarak İndir
+          </button>
+          <button
+            className='w-full rounded-xl border bg-red-400 py-2 font-semibold text-white duration-300 hover:bg-red-500'
+            onClick={onClose}
+          >
+            Kapat
           </button>
         </div>
       </div>

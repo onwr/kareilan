@@ -7,6 +7,8 @@ import FirmaOlustur from './screens/FirmaOlustur';
 import FirmaPortalList from './screens/FirmaPortalList';
 import OdemeAyar from './screens/OdemeAyar';
 import OdemeYontemleri from './screens/OdemeYontemleri';
+import Firmalar from './screens/Firmalar';
+import KullaniciOlustur from './screens/KullaniciOlustur';
 
 const Panel = () => {
   const [selectIndex, setSelectedIndex] = useState(0);
@@ -22,6 +24,8 @@ const Panel = () => {
         {selectIndex === 4 && <FirmaPortalList />}
         {selectIndex === 5 && <OdemeAyar />}
         {selectIndex === 6 && <OdemeYontemleri />}
+        {selectIndex === 7 && <Firmalar />}
+        {selectIndex === 8 && <KullaniciOlustur />}
       </div>
     </div>
   );

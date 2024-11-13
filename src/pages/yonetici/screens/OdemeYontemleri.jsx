@@ -43,7 +43,7 @@ const OdemeYontemleri = () => {
       {odemeYontemleri.length === 0 ? (
         <p className='mt-5'>Henüz ödeme yöntemi eklenmedi.</p>
       ) : (
-        <ul className='mt-5 grid grid-cols-1 md:grid-cols-2'>
+        <ul className='mt-5 grid grid-cols-1 gap-3 md:grid-cols-2'>
           {odemeYontemleri.map((odeme) => (
             <li
               key={odeme.id}
