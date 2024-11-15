@@ -37,27 +37,29 @@ const Hero = () => {
         Emlak afişlerinizi QR kod ile internete bağlayın, daha fazla detay paylaşın.
       </motion.p>
 
-      <div className='mt-5 flex items-center gap-2'>
-        <motion.a
-          className='flex cursor-pointer items-center gap-3 rounded-lg bg-yellow-400 px-4 py-2 font-semibold text-black duration-300 hover:bg-yellow-500/80'
-          initial={{ opacity: 0, x: 0 }}
-          href='/hesap/giris'
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-        >
-          Giriş Yap
-          <LuLogIn />
-        </motion.a>
-        <motion.a
-          className='flex cursor-pointer items-center gap-3 rounded-lg bg-black px-4 py-2 font-semibold text-yellow-500 duration-300 hover:bg-black/80'
-          initial={{ opacity: 0, x: 0 }}
-          href='/hesap/olustur'
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-        >
-          Hemen Üye Ol
-          <FaRightLong />
-        </motion.a>
+      <div className='mt-5 flex flex-col items-center justify-center gap-2 md:flex-row'>
+        <div className='flex items-center gap-2'>
+          <motion.a
+            className='flex cursor-pointer items-center gap-3 rounded-lg bg-yellow-400 px-4 py-2 font-semibold text-black duration-300 hover:bg-yellow-500/80'
+            initial={{ opacity: 0, x: 0 }}
+            href='/hesap/giris'
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+          >
+            Giriş Yap
+            <LuLogIn />
+          </motion.a>
+          <motion.a
+            className='flex cursor-pointer items-center gap-3 rounded-lg bg-black px-4 py-2 font-semibold text-yellow-500 duration-300 hover:bg-black/80'
+            initial={{ opacity: 0, x: 0 }}
+            href='/hesap/olustur'
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+          >
+            Hemen Üye Ol
+            <FaRightLong />
+          </motion.a>
+        </div>
 
         <motion.a
           href='#nasilcalisir'

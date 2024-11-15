@@ -16,7 +16,7 @@ import { motion } from 'framer-motion';
 import AfisOlustur from './screens/AfisOlustur';
 import AfisDuzenle from './screens/AfisDuzenle';
 
-const Profilim = () => {
+const Profilim = ({ demo }) => {
   const [loading, setLoading] = useState(false);
   const [emlak, setEmlak] = useState({});
   const [formData, setFormData] = useState({});
@@ -70,6 +70,11 @@ const Profilim = () => {
   }, [selectScreen]);
 
   const handleUpdate = async () => {
+    if (demo) {
+      toast.error('Demo modu aktif. İşlemler gerçekleştirilemez.');
+      return;
+    }
+
     try {
       const docRef = doc(db, 'kullanicilar', userToken);
       await updateDoc(docRef, formData);
@@ -86,6 +91,24 @@ const Profilim = () => {
     const { name, value } = e.target;
     setFormData((prevData) => ({ ...prevData, [name]: value }));
   };
+
+  useEffect(() => {
+    const handleBackButton = (e) => {
+      if (selectScreen !== 0) {
+        e.preventDefault();
+        setSelectScreen(0);
+      } else {
+        navigate('/');
+      }
+    };
+
+    window.addEventListener('popstate', handleBackButton);
+
+    history.pushState(null, null, window.location.href);
+    return () => {
+      window.removeEventListener('popstate', handleBackButton);
+    };
+  }, [selectScreen]);
 
   return loading ? (
     <Loader />
@@ -222,10 +245,16 @@ const Profilim = () => {
             </form>
           </motion.div>
         ) : selectScreen === 2 ? (
-          <AfisOlustur loading={setLoading} screen={setSelectScreen} token={userToken} />
+          <AfisOlustur
+            loading={setLoading}
+            demo={demo}
+            screen={setSelectScreen}
+            token={userToken}
+          />
         ) : selectScreen === 3 ? (
           <AfisDuzenle
             slug={slug}
+            demo={demo}
             loading={setLoading}
             screen={setSelectScreen}
             token={userToken}

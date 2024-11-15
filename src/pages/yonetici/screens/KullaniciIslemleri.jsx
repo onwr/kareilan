@@ -1,4 +1,4 @@
-import { collection, query, where, getDocs, updateDoc, doc } from 'firebase/firestore';
+import { collection, query, where, getDocs, updateDoc, doc, deleteDoc } from 'firebase/firestore';
 import React, { useState } from 'react';
 import toast from 'react-hot-toast';
 import { db } from 'src/db/Firebase';
@@ -154,6 +154,50 @@ const KullaniciIslemleri = () => {
     const { value } = e.target;
     ilan.bitisTarih = new Date(value);
     setDuzenlenenIlan({ ...ilan });
+  };
+
+  const increaseDurationByOneMonth = async () => {
+    const now = new Date();
+    const oneMonthLater = new Date(now.setMonth(now.getMonth() + 1));
+
+    try {
+      for (const ilan of ilanlar) {
+        const ilanRef = doc(db, 'kullanicilar', sonuc.docId, 'ilan', ilan.id);
+        await updateDoc(ilanRef, { bitisTarih: oneMonthLater });
+      }
+      toast.success('Tüm ilanların süresi 1 ay artırıldı!');
+    } catch (error) {
+      console.error('Tüm ilanların süresi artırılamadı: ', error);
+      toast.error('Tüm ilanların süresi artırılamadı');
+    }
+  };
+
+  const increaseDurationByOneYear = async () => {
+    const now = new Date();
+    const oneYearLater = new Date(now.setFullYear(now.getFullYear() + 1));
+
+    try {
+      for (const ilan of ilanlar) {
+        const ilanRef = doc(db, 'kullanicilar', sonuc.docId, 'ilan', ilan.id);
+        await updateDoc(ilanRef, { bitisTarih: oneYearLater });
+      }
+      toast.success('Tüm ilanların süresi 1 yıl artırıldı!');
+    } catch (error) {
+      console.error('Tüm ilanların süresi artırılamadı: ', error);
+      toast.error('Tüm ilanların süresi artırılamadı');
+    }
+  };
+
+  const handleIlanKaldir = async (ilanId) => {
+    try {
+      const ilanRef = doc(db, 'kullanicilar', sonuc.docId, 'ilan', ilanId);
+      await deleteDoc(ilanRef);
+      toast.success('İlan başarıyla kaldırıldı!');
+      setIlanlar(ilanlar.filter((ilan) => ilan.id !== ilanId));
+    } catch (error) {
+      console.error('İlan kaldırma sırasında hata oluştu:', error);
+      toast.error('İlan kaldırma sırasında hata oluştu');
+    }
   };
 
   return (
@@ -388,7 +432,21 @@ const KullaniciIslemleri = () => {
 
           {ilanGoster && ilanlar.length > 0 && (
             <div className='mt-4'>
-              <h4 className='text-lg font-bold'>İlan Sayısı: {ilanlar.length}</h4>
+              <div className='mt-4 flex flex-col items-center gap-2 md:flex-row'>
+                <h4 className='text-lg font-bold'>İlan Sayısı: {ilanlar.length}</h4>
+                <button
+                  className='w-full max-w-xs rounded-xl bg-yellow-400 py-1 text-sm font-bold duration-300 hover:bg-yellow-500'
+                  onClick={increaseDurationByOneMonth}
+                >
+                  Tüm Süreleri 1 Ay Artır
+                </button>
+                <button
+                  className='w-full max-w-xs rounded-xl bg-blue-400 py-1 text-sm font-bold duration-300 hover:bg-blue-500'
+                  onClick={increaseDurationByOneYear}
+                >
+                  Tüm Süreleri 1 Yıl Artır
+                </button>
+              </div>
               <div className='grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5'>
                 {ilanlar.map((ilan, index) => (
                   <div key={index} className='mt-2 rounded-xl border bg-yellow-100/20 p-4'>
@@ -422,6 +480,12 @@ const KullaniciIslemleri = () => {
                       onClick={() => handleIlanGuncelle(ilan)}
                     >
                       Tarihi Güncelle
+                    </button>
+                    <button
+                      onClick={() => handleIlanKaldir(ilan.docId)}
+                      className='mt-2 w-full rounded-lg bg-red-500 py-1 text-white'
+                    >
+                      İlanı Kaldır
                     </button>
                   </div>
                 ))}

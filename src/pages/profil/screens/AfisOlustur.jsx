@@ -6,12 +6,13 @@ import { db } from 'src/db/Firebase';
 import { CiCirclePlus } from 'react-icons/ci';
 import OdemeModal from 'src/modals/odemeModal';
 
-const AfisOlustur = ({ screen, token }) => {
+const AfisOlustur = ({ screen, token, demo }) => {
   const [afisData, setAfisData] = useState({ iletisimBilgi: {} });
   const [ilanSayisi, setIlanSayisi] = useState(0);
   const [kurumsalUye, setKurumsalUye] = useState(false);
   const [maxAfisLimit, setMaxAfisLimit] = useState(0);
   const [showModal, setShowModal] = useState(false);
+  const [fiyatlar, setFiyatlar] = useState([]);
 
   useEffect(() => {
     const kurumsalCheck = async () => {
@@ -52,7 +53,27 @@ const AfisOlustur = ({ screen, token }) => {
     fetchIlanSayisi();
   }, [token]);
 
+  useEffect(() => {
+    const fetchFiyatlar = async () => {
+      try {
+        const fiyatRef = collection(db, 'fiyatlandirma');
+        const snapshot = await getDocs(fiyatRef);
+        const fiyatData = snapshot.docs.map((doc) => doc.data());
+        setFiyatlar(fiyatData);
+      } catch (error) {
+        toast.error('Fiyat bilgileri alınamadı.');
+      }
+    };
+
+    fetchFiyatlar();
+  }, []);
+
   const handleAfisOlustur = async (adet) => {
+    if (demo) {
+      toast.error('Demo modunda işlem yapılamaz.');
+      return;
+    }
+
     const kalanHak = maxAfisLimit - ilanSayisi;
     const olusturulacakAdet = adet > kalanHak ? kalanHak : adet;
 
@@ -76,6 +97,7 @@ const AfisOlustur = ({ screen, token }) => {
           ...afisData,
           olusturmaTarih,
           bitisTarih,
+          links: {},
           docId: yeniIlanId,
         };
 
@@ -118,7 +140,27 @@ const AfisOlustur = ({ screen, token }) => {
           </button>
         </div>
 
-        <p className='text-xl font-bold underline'>Bireysel Üyelik</p>
+        <div className='mb-4'>
+          <p className='text-xl font-bold underline'>Fiyatlandırma</p>
+          <table className='min-w-full table-auto'>
+            <thead>
+              <tr className='border-b'>
+                <th className='px-4 py-2 text-left'>İlan Adeti</th>
+                <th className='px-4 py-2 text-left'>Fiyat</th>
+              </tr>
+            </thead>
+            <tbody>
+              {fiyatlar.map((fiyat) => (
+                <tr key={fiyat.adet} className='border-b'>
+                  <td className='px-4 py-2'>{fiyat.adet} Adet İlan</td>
+                  <td className='px-4 py-2'>{fiyat.fiyat} ₺ /Yıl</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <p className='mt-5 text-xl font-bold underline'>Bireysel Üyelik</p>
         <div className='mt-2 flex flex-col items-center gap-2 md:flex-row'>
           <div
             className='group flex w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border bg-gradient-to-b from-amber-200 to-slate-50 p-12 ring-yellow-600 duration-300 hover:ring-1 md:w-auto'
@@ -146,15 +188,15 @@ const AfisOlustur = ({ screen, token }) => {
             <p className='text-xl font-semibold'>20 Adet Afiş Oluştur</p>
           </div>
         </div>
-
         <button
           onClick={() => screen(0)}
-          className='mt-5 w-full rounded-xl bg-black/40 py-2 font-semibold text-white duration-300 hover:bg-black/60'
+          className='mt-5 w-full rounded-xl bg-black/50 py-2 font-semibold text-white'
         >
           Geri Dön
         </button>
-        <OdemeModal isOpen={showModal} onClose={() => setShowModal(false)} />
       </motion.div>
+
+      <OdemeModal show={showModal} setShow={setShowModal} />
     </div>
   );
 };

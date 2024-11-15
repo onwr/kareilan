@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { LuImagePlus } from 'react-icons/lu';
 import { db, storage } from 'src/db/Firebase';
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, addDoc, doc, getDocs, getDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import toast from 'react-hot-toast';
 
@@ -10,8 +10,31 @@ const SablonEkle = () => {
   const [imageUrl, setImageUrl] = useState('');
   const [title, setTitle] = useState('');
   const [adres, setAdres] = useState('');
+  const [firma, setFirma] = useState('');
   const [category, setCategory] = useState('Dikey');
+  const [categories, setCategories] = useState([]);
   const [description, setDescription] = useState('');
+
+  useEffect(() => {
+    const kategoriCek = async () => {
+      try {
+        const docRef = doc(db, 'sablonlar', 'kategoriler');
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          const kategoriList = docSnap.data().kategoriList || [];
+          setCategories(kategoriList);
+        } else {
+          console.log('Belge bulunamadı.');
+        }
+      } catch (error) {
+        toast.error('Kategoriler getirilemedi.');
+        console.log(error);
+      }
+    };
+
+    kategoriCek();
+  }, []);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -41,6 +64,7 @@ const SablonEkle = () => {
         type: category,
         aciklama: description,
         adres,
+        firma,
         link: uploadedImageUrl,
         createdAt: new Date(),
       });
@@ -48,6 +72,7 @@ const SablonEkle = () => {
       toast.success('Şablon başarıyla oluşturuldu!');
       setTitle('');
       setCategory('Dikey');
+      setFirma('');
       setDescription('');
       setSelectedImage(null);
       setImageUrl('');
@@ -57,7 +82,7 @@ const SablonEkle = () => {
   };
 
   return (
-    <div className='container w-full rounded-lg border bg-white p-5'>
+    <div className='container w-full rounded-lg bg-white p-5 md:border'>
       <p className='text-xl font-semibold'>Şablon Ekle</p>
 
       <div className='mt-5 flex flex-col gap-5 lg:flex-row'>
@@ -100,17 +125,37 @@ const SablonEkle = () => {
               />
             </div>
 
-            <div className='mb-4'>
-              <label className='block text-sm font-medium'>Kategori</label>
-              <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                className='w-full rounded border p-2 focus:outline-none focus:ring focus:ring-yellow-500'
-              >
-                <option value='dikey'>Dikey</option>
-                <option value='yatay'>Yatay</option>
-                <option value='Kare'>Kare</option>
-              </select>
+            <div className='mb-4 flex w-full items-center gap-5'>
+              <div className='flex-1'>
+                <label className='block text-sm font-medium'>Kategori</label>
+                <select
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  className='w-full rounded border p-2 focus:outline-none focus:ring focus:ring-yellow-500'
+                >
+                  <option value='Dikey'>Dikey</option>
+                  <option value='Yatay'>Yatay</option>
+                  <option value='Kare'>Kare</option>
+                </select>
+              </div>
+              <div className='flex-1'>
+                <label className='block text-sm font-medium'>Firma Seç</label>
+                <select
+                  value={firma}
+                  onChange={(e) => setFirma(e.target.value)}
+                  className='w-full rounded border p-2 focus:outline-none focus:ring focus:ring-yellow-500'
+                >
+                  {categories.length > 0 ? (
+                    categories.map((kategori, index) => (
+                      <option key={index} value={kategori.ad}>
+                        {kategori.ad}
+                      </option>
+                    ))
+                  ) : (
+                    <option value=''>Firma Bulunamadı</option>
+                  )}
+                </select>
+              </div>
             </div>
 
             <div className='mb-4'>

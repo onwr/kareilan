@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import sablonlar from '../video/sablonlar.mp4';
 import { motion, AnimatePresence } from 'framer-motion';
-import { collection, getDocs } from 'firebase/firestore';
+import { doc, getDoc, collection, getDocs } from 'firebase/firestore';
 import { db } from 'src/db/Firebase';
 import toast from 'react-hot-toast';
 
@@ -10,45 +10,77 @@ const Sablonlar = () => {
   const [yataySablon, setYataySablon] = useState([]);
   const [dikeySablon, setDikeySablon] = useState([]);
   const [kareSablon, setKareSablon] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedFirma, setSelectedFirma] = useState('');
+  const [kategoriList, setKategoriList] = useState([]);
+
+  // Şablonları çekme fonksiyonu
+  const sablonCek = async () => {
+    try {
+      const sablonRef = collection(db, 'sablonlar');
+      const sablonSnap = await getDocs(sablonRef);
+
+      if (!sablonSnap.empty) {
+        const dikeyList = [];
+        const yatayList = [];
+        const kareList = [];
+
+        sablonSnap.forEach((sablon) => {
+          const data = sablon.data();
+
+          if (data.type === 'Dikey') {
+            dikeyList.push(data);
+          } else if (data.type === 'Yatay') {
+            yatayList.push(data);
+          } else if (data.type === 'Kare') {
+            kareList.push(data);
+          }
+        });
+
+        setDikeySablon(dikeyList);
+        setYataySablon(yatayList);
+        setKareSablon(kareList);
+      }
+    } catch (error) {
+      toast.error('Şablonlar çekilirken hata oluştu');
+      console.log(error);
+    }
+  };
+
+  // Kategorileri çekme fonksiyonu
+  const fetchCategories = async () => {
+    try {
+      const docRef = doc(db, 'sablonlar', 'kategoriler');
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        const existingData = docSnap.data();
+        const kategoriListData = existingData.kategoriList || [];
+        setKategoriList(kategoriListData);
+      } else {
+        toast.error('Kategoriler dökümanı bulunamadı.');
+      }
+    } catch (error) {
+      console.error('Veriler alınırken hata oluştu:', error);
+    }
+  };
 
   useEffect(() => {
-    const sablonCek = async () => {
-      try {
-        const sablonRef = collection(db, 'sablonlar');
-        const sablonSnap = await getDocs(sablonRef);
-
-        if (!sablonSnap.empty) {
-          const dikeyList = [];
-          const yatayList = [];
-          const kareList = [];
-
-          sablonSnap.forEach((sablon) => {
-            const data = sablon.data();
-
-            if (data.type === 'Dikey') {
-              dikeyList.push(data);
-            } else if (data.type === 'Yatay') {
-              yatayList.push(data);
-            } else if (data.type === 'Kare') {
-              kareList.push(data);
-            }
-          });
-
-          setDikeySablon(dikeyList);
-          setYataySablon(yatayList);
-          setKareSablon(kareList);
-        }
-      } catch (error) {
-        toast.error('Şablonlar çekilirken hata oluştu');
-        console.log(error);
-      }
-    };
-
     sablonCek();
+    fetchCategories();
   }, []);
 
   const togglePopup = () => {
     setShowPopup(!showPopup);
+  };
+
+  const filterTemplates = (templates) => {
+    return templates.filter((item) => {
+      return (
+        (!selectedCategory || item.type === selectedCategory) &&
+        (!selectedFirma || item.firma === selectedFirma)
+      );
+    });
   };
 
   const pageVariants = {
@@ -131,6 +163,32 @@ const Sablonlar = () => {
         </AnimatePresence>
       </div>
 
+      <div className='mx-auto mt-4 flex flex-col gap-4 md:flex-row'>
+        <select
+          value={selectedCategory}
+          onChange={(e) => setSelectedCategory(e.target.value)}
+          className='w-full max-w-80 rounded-md border p-2'
+        >
+          <option value=''>Tüm Kategoriler</option>
+          <option value='Yatay'>Yatay</option>
+          <option value='Dikey'>Dikey</option>
+          <option value='Kare'>Kare</option>
+        </select>
+
+        <select
+          value={selectedFirma}
+          onChange={(e) => setSelectedFirma(e.target.value)}
+          className='w-full max-w-80 rounded-md border p-2'
+        >
+          <option value=''>Firma Seç</option>
+          {kategoriList.map((kategori, index) => (
+            <option key={index} value={kategori.ad}>
+              {kategori.ad}
+            </option>
+          ))}
+        </select>
+      </div>
+
       <motion.p
         className='mt-5 text-3xl font-bold'
         initial={{ opacity: 0 }}
@@ -139,14 +197,14 @@ const Sablonlar = () => {
       >
         YATAY AFİŞLER
       </motion.p>
-      <div className='container mt-3 grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3'>
-        {yataySablon.map((item, index) => (
+      <div className='container mt-3 grid grid-cols-2 gap-5 lg:grid-cols-3'>
+        {filterTemplates(yataySablon).map((item, index) => (
           <motion.div
             key={index}
             className='flex flex-col items-center gap-3 bg-neutral-100 p-4'
             whileHover={{ scale: 1.05 }}
           >
-            <img src={item.link} alt={`Yatay Afiş ${index + 1}`} />
+            <img src={item.link} className='w-40' alt={`Yatay Afiş ${index + 1}`} />
             <p className='font-semibold'>{item.baslik}</p>
             <p>{item.aciklama}</p>
             <a
@@ -159,29 +217,22 @@ const Sablonlar = () => {
         ))}
       </div>
 
-      <motion.div
-        className='mt-5 h-2 w-full bg-black'
-        initial={{ width: 0 }}
-        animate={{ width: '100%' }}
-        transition={{ duration: 0.7 }}
-      ></motion.div>
-
       <motion.p
         className='mt-5 text-3xl font-bold'
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 0.8 }}
+        transition={{ delay: 0.7 }}
       >
         DİKEY AFİŞLER
       </motion.p>
-      <div className='container mt-3 grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3'>
-        {dikeySablon.map((item, index) => (
+      <div className='container mt-3 grid grid-cols-2 gap-5 lg:grid-cols-3'>
+        {filterTemplates(dikeySablon).map((item, index) => (
           <motion.div
             key={index}
             className='flex flex-col items-center gap-3 bg-neutral-100 p-4'
             whileHover={{ scale: 1.05 }}
           >
-            <img src={item.link} alt={`Yatay Afiş ${index + 1}`} />
+            <img src={item.link} className='w-40' alt={`Dikey Afiş ${index + 1}`} />
             <p className='font-semibold'>{item.baslik}</p>
             <p>{item.aciklama}</p>
             <a
@@ -198,18 +249,18 @@ const Sablonlar = () => {
         className='mt-5 text-3xl font-bold'
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 0.8 }}
+        transition={{ delay: 0.9 }}
       >
         KARE AFİŞLER
       </motion.p>
-      <div className='container mt-3 grid grid-cols-1 gap-5 pb-5 md:grid-cols-2 lg:grid-cols-3'>
-        {kareSablon.map((item, index) => (
+      <div className='container mt-3 grid grid-cols-2 gap-5 lg:grid-cols-3'>
+        {filterTemplates(kareSablon).map((item, index) => (
           <motion.div
             key={index}
             className='flex flex-col items-center gap-3 bg-neutral-100 p-4'
             whileHover={{ scale: 1.05 }}
           >
-            <img src={item.resim} alt={`Yatay Afiş ${index + 1}`} />
+            <img src={item.link} className='w-40' alt={`Kare Afiş ${index + 1}`} />
             <p className='font-semibold'>{item.baslik}</p>
             <p>{item.aciklama}</p>
             <a

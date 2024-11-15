@@ -15,7 +15,6 @@ const ProfilOlustur = () => {
     firma: '',
     gsm: '',
     email: '',
-    ymmNo: '',
     sifre: '',
     slug: '',
     kurumsal: false,
@@ -45,7 +44,7 @@ const ProfilOlustur = () => {
     e.preventDefault();
     setLoading(true);
 
-    const { email, ad, firma, gsm, ymmNo, sifre, slug, kurumsal } = formData;
+    const { email, ad, firma, gsm, sifre, slug, kurumsal } = formData;
 
     if (sifre.length < 6) {
       toast.error('Şifreniz en az 6 karakter olmalıdır');
@@ -85,11 +84,10 @@ const ProfilOlustur = () => {
         firma,
         gsm,
         email,
-        ymmNo,
         sifre,
         uid: userId,
         fKod: randomKod,
-        afisSinir: 20,
+        afisSinir: 21,
         slug,
         kurumsal,
         admin: false,
@@ -98,7 +96,7 @@ const ProfilOlustur = () => {
       });
 
       const bugun = Timestamp.now();
-      const bitisTarih = Timestamp.fromMillis(bugun.toMillis() + 600 * 24 * 60 * 60 * 1000);
+      const bitisTarih = Timestamp.fromMillis(bugun.toMillis() + 365 * 24 * 60 * 60 * 1000);
 
       await setDoc(doc(db, `kullanicilar/${userId}/ilan`, '000'), {
         olusturmaTarih: bugun,
@@ -107,6 +105,7 @@ const ProfilOlustur = () => {
 
       toast.success('Kayıt başarılı. Yönlendiriliyorsunuz...');
       Cookies.set('userToken', userId, { expires: 7 });
+      Cookies.set('slug', slug, { expires: 7 });
       setLoading(false);
       navigate('/hesap/panel');
     } catch (error) {
@@ -163,15 +162,6 @@ const ProfilOlustur = () => {
                 type='text'
                 placeholder='GSM'
                 className='w-80 rounded-lg border border-yellow-500 bg-gray-900 p-2 text-center text-neutral-300 outline-none ring-yellow-600 duration-300 focus:ring-2'
-              />
-
-              <input
-                name='ymmNo'
-                value={formData.ymmNo}
-                onChange={handleChange}
-                type='text'
-                placeholder='MMY NO'
-                className='rounded-lg border border-yellow-500 bg-gray-900 p-2 text-center text-neutral-300 outline-none ring-yellow-600 duration-300 focus:ring-2'
               />
               <input
                 name='email'

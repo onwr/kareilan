@@ -149,6 +149,14 @@ const Sidebar = ({ screen }) => {
                       Yeni Şablon
                     </button>
                   </li>
+                  <li className='border-b'>
+                    <button
+                      onClick={() => screen(9)}
+                      className='block w-full px-4 py-2 hover:bg-gray-100'
+                    >
+                      Kategori Oluştur
+                    </button>
+                  </li>
                   <li>
                     <button
                       onClick={() => screen(2)}
@@ -189,6 +197,14 @@ const Sidebar = ({ screen }) => {
                       className='block w-full px-4 py-2 hover:bg-gray-100'
                     >
                       Ödeme Yöntemi Ekle
+                    </button>
+                  </li>
+                  <li className='border-b'>
+                    <button
+                      onClick={() => screen(10)}
+                      className='block w-full px-4 py-2 hover:bg-gray-100'
+                    >
+                      İlan Fiyatları
                     </button>
                   </li>
                   <li>

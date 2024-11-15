@@ -9,6 +9,8 @@ import OdemeAyar from './screens/OdemeAyar';
 import OdemeYontemleri from './screens/OdemeYontemleri';
 import Firmalar from './screens/Firmalar';
 import KullaniciOlustur from './screens/KullaniciOlustur';
+import SablonKategori from './screens/SablonKategori';
+import IlanFiyat from './screens/IlanFiyat';
 
 const Panel = () => {
   const [selectIndex, setSelectedIndex] = useState(0);
@@ -26,6 +28,8 @@ const Panel = () => {
         {selectIndex === 6 && <OdemeYontemleri />}
         {selectIndex === 7 && <Firmalar />}
         {selectIndex === 8 && <KullaniciOlustur />}
+        {selectIndex === 9 && <SablonKategori />}
+        {selectIndex === 10 && <IlanFiyat />}
       </div>
     </div>
   );

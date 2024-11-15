@@ -9,7 +9,7 @@ import AfisIndir from './modals/AfisIndir';
 import { useNavigate } from 'react-router-dom';
 import { FaRegCopy } from 'react-icons/fa6';
 
-const AfisDuzenle = ({ slug, screen, token }) => {
+const AfisDuzenle = ({ slug, screen, token, demo }) => {
   const [afisLink, setAfisLink] = useState('');
   const [afisData, setAfisData] = useState({ links: [] });
   const [veriGetirildi, setVeriGetirildi] = useState(false);
@@ -74,6 +74,11 @@ const AfisDuzenle = ({ slug, screen, token }) => {
   };
 
   const afisSorgula = async () => {
+    if (demo) {
+      toast.error('Demo modunda işlem yapılamaz.');
+      return;
+    }
+
     if (!afisLink) {
       toast.error('Lütfen geçerli bir afiş adresi girin!');
       return;
@@ -91,6 +96,34 @@ const AfisDuzenle = ({ slug, screen, token }) => {
       setDocId(documentId);
 
       const ilanRef = doc(db, `kullanicilar/${token}/ilan/${documentId}`);
+      const ilanDoc = await getDoc(ilanRef);
+
+      if (ilanDoc.exists()) {
+        setAfisData(ilanDoc.data() || { links: {} });
+        toast.success('İlan verisi getirildi!');
+        setVeriGetirildi(true);
+      } else {
+        toast.error('Bu numaraya ait ilan bulunamadı.');
+      }
+    } catch (error) {
+      toast.error('Veri sorgulama sırasında hata oluştu.');
+      console.error('Hata:', error);
+    }
+  };
+
+  const afisSorgulaQR = async (afisAdres) => {
+    if (demo) {
+      toast.error('Demo modunda işlem yapılamaz.');
+      return;
+    }
+
+    if (!afisAdres) {
+      toast.error('Lütfen geçerli bir afiş adresi girin!');
+      return;
+    }
+
+    try {
+      const ilanRef = doc(db, `kullanicilar/${token}/ilan/${afisAdres}`);
       const ilanDoc = await getDoc(ilanRef);
 
       if (ilanDoc.exists()) {
@@ -216,6 +249,11 @@ const AfisDuzenle = ({ slug, screen, token }) => {
   };
 
   const handleUpdate = async () => {
+    if (demo) {
+      toast.error('Demo modunda işlem yapılamaz.');
+      return;
+    }
+
     if (!docId) return;
 
     try {
@@ -257,11 +295,15 @@ const AfisDuzenle = ({ slug, screen, token }) => {
   };
 
   const handleScan = (data) => {
-    if (data) {
-      setAfisLink(data);
-      setIsScanning(false);
+    console.log('Scanned data:', data);
+    if (data && data.text) {
+      const lastPart = data.text.split('/').pop();
+
       toast.success('QR kod başarıyla tarandı!');
-      afisSorgula();
+      setTimeout(() => {
+        afisSorgulaQR(lastPart);
+      }, 1000);
+      setIsScanning(false);
     }
   };
 
@@ -281,9 +323,11 @@ const AfisDuzenle = ({ slug, screen, token }) => {
             <QrScanner
               delay={300}
               onError={handleError}
+              constraints={{
+                video: { facingMode: facingMode },
+              }}
               onScan={handleScan}
               style={{ width: '100%', borderRadius: '10px' }}
-              facingMode={facingMode}
             />
             <button
               onClick={toggleCamera}
@@ -551,7 +595,7 @@ const AfisDuzenle = ({ slug, screen, token }) => {
           </>
         )}
       </div>
-      {afisOlusturModal && <AfisIndir onClose={onCloseModal} />}
+      {afisOlusturModal && <AfisIndir slug={slug} docId={docId} onClose={onCloseModal} />}
     </div>
   );
 };

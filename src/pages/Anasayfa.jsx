@@ -1,3 +1,4 @@
+import Demo from '@components/anasayfa/Demo';
 import Features from '@components/anasayfa/Features';
 import Hero from '@components/anasayfa/Hero';
 import HowItWork from '@components/anasayfa/HowItWork';
@@ -12,6 +13,7 @@ const Anasayfa = () => {
       <Hero />
       <Video />
       <Features />
+      <Demo />
       <HowItWork />
       <Start />
       <Footer />
