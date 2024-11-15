@@ -4,6 +4,7 @@ import logo2 from '@images/logo2.png';
 import { FaArrowDown, FaArrowUp } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
 import { RxHamburgerMenu } from 'react-icons/rx';
+import { useNavigate } from 'react-router-dom';
 
 const Sidebar = ({ screen }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -11,6 +12,7 @@ const Sidebar = ({ screen }) => {
   const [isKisitDropdownOpen, setIsKisitDropdownOpen] = useState(false);
   const [isSablonDropdownOpen, setIsSablonDropdownOpen] = useState(false);
   const [isOdemeDropDown, setIsOdemeDropDown] = useState(false);
+  const navigate = useNavigate();
 
   const dropdownVariants = {
     hidden: { opacity: 0, height: 0 },
@@ -27,7 +29,12 @@ const Sidebar = ({ screen }) => {
       </button>
 
       <div className={`mt-5 w-full ${isSidebarOpen ? 'block' : 'hidden'} md:block`}>
-        <img src={logo} className='mx-auto mt-5 w-24' alt='Logo' />
+        <img
+          src={logo}
+          onClick={() => navigate('/')}
+          className='mx-auto mt-5 w-24 cursor-pointer'
+          alt='Logo'
+        />
 
         <div className='mt-8 w-full px-4'>
           <button

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import logo from '@images/logo.png';
 import emlakBG from '@images/emlak.jpg';
 import { db } from 'src/db/Firebase';
@@ -7,14 +7,15 @@ import { collection, getDoc, getDocs, query, where, doc } from 'firebase/firesto
 import telefon from '@images/icons/telefon.webp';
 import whatsapp from '@images/icons/wp.webp';
 import mail from '@images/icons/mail.webp';
-import Loader from 'src/layout/Loader'; // Assuming this is your custom loader
+import Loader from 'src/layout/Loader';
 import { motion } from 'framer-motion';
 
 const IlanDetay = () => {
   const { firma, id } = useParams();
   const [emlakData, setEmlakData] = useState({});
   const [firmaAd, setFirmaAd] = useState('');
-  const [loading, setLoading] = useState(true); // Set loading state to true initially
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const ilanGetir = async () => {
@@ -39,14 +40,13 @@ const IlanDetay = () => {
       } catch (error) {
         console.error('Hata oluştu:', error);
       } finally {
-        setLoading(false); // Set loading to false after data is fetched
+        setLoading(false);
       }
     };
 
     ilanGetir();
   }, [firma, id]);
 
-  // If data is loading, show the Loader component
   if (loading) {
     return <Loader />;
   }
@@ -67,8 +67,9 @@ const IlanDetay = () => {
       <div className='relative z-10 flex min-h-screen flex-col items-center bg-black bg-opacity-95 py-5 md:justify-center'>
         <motion.img
           src={logo}
+          onClick={() => navigate('/')}
           alt='Kareilan'
-          className='w-20 md:w-40'
+          className='w-20 cursor-pointer md:w-32'
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ duration: 1 }}

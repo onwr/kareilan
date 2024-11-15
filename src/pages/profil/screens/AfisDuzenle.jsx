@@ -37,7 +37,6 @@ const AfisDuzenle = ({ slug, screen, token, demo }) => {
         }
 
         setFirmalar(firms);
-        console.log(firms);
       } catch (error) {
         console.error('Firmalar verisi çekilemedi:', error);
       }
@@ -249,22 +248,46 @@ const AfisDuzenle = ({ slug, screen, token, demo }) => {
       return;
     }
 
-    if (!docId) return;
+    if (!docId) {
+      console.error('docId bulunamadı.');
+      return;
+    }
 
     try {
+      console.log('Güncelleme başlatıldı');
+      console.log('Afis Data:', afisData);
+      console.log('Firmalar:', firmalar);
+
       for (const data of firmalar) {
         if (data.kisitlar) {
           for (const kisit of data.kisitlar) {
+            // Afis Data içindeki linkleri kontrol et
             const platformUrl =
               afisData.links?.[kisit.dbName]?.link || afisData.links?.[kisit.dbName];
 
-            if (typeof platformUrl !== 'string') {
-              console.error('URL bir string değil:', platformUrl);
-              toast.error(`Geçersiz ${kisit.adi} URL formatı.`);
-              return;
+            // Eğer platformUrl undefined ise kontrolü atla
+            if (platformUrl === undefined) {
+              console.warn(`Uyarı: ${kisit.dbName} için URL bulunamadı, kontrol atlanıyor.`);
+              continue; // Bir sonraki firmaya geç
             }
 
-            if (!validateUrl(platformUrl, kisit.dbName)) {
+            // Debug: platformUrl'nin tipini kontrol et
+            console.log(`Kontrol Ediliyor - Platform: ${kisit.dbName}, URL:`, platformUrl);
+
+            if (typeof platformUrl !== 'string' || !platformUrl) {
+              console.error(
+                `Hata: ${kisit.dbName} için URL bir string değil veya boş:`,
+                platformUrl
+              );
+              toast.error(`Geçersiz ${kisit.adi} URL formatı.`);
+              return; // Eğer geçersizse güncellemeyi durdur
+            }
+
+            // URL'nin doğruluğunu kontrol et
+            const isValid = validateUrl(platformUrl, kisit.dbName);
+            console.log(`URL doğrulandı mı (${kisit.dbName}):`, isValid);
+
+            if (!isValid) {
               toast.error(`Geçersiz ${kisit.adi} URL'si.`);
               return;
             }
@@ -272,10 +295,12 @@ const AfisDuzenle = ({ slug, screen, token, demo }) => {
         }
       }
 
+      // Firestore güncelleme işlemi
       const ilanRef = doc(db, `kullanicilar/${token}/ilan/${docId}`);
       await updateDoc(ilanRef, afisData);
       toast.success('Veriler başarıyla güncellendi!');
     } catch (error) {
+      console.error('Güncelleme sırasında hata oluştu:', error);
       toast.error('Güncelleme sırasında hata oluştu.');
     }
   };

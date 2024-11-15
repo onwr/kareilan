@@ -50,7 +50,12 @@ const Giris = () => {
         alt='Emlak Arka Planı'
       />
       <div className='flex w-full flex-col items-center justify-center gap-3 bg-black'>
-        <img src={logo} alt='Logo' className='w-32' />
+        <img
+          src={logo}
+          onClick={() => navigate('/')}
+          alt='Logo'
+          className='z-50 w-32 cursor-pointer'
+        />
         <div className='flex w-full flex-col items-center gap-1 pb-20'>
           <p className='text-3xl font-semibold text-yellow-500'>Üyelik</p>
           <p className='text-md font-medium text-gray-400'>Giriş Yap</p>

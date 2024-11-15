@@ -100,6 +100,14 @@ const ProfilOlustur = () => {
         olusturmaTarih: new Date().toISOString(),
       });
 
+      const bugun = Timestamp.now();
+      const bitisTarih = Timestamp.fromMillis(bugun.toMillis() + 365 * 24 * 60 * 60 * 1000);
+
+      await setDoc(doc(db, `kullanicilar/${userId}/ilan`, '000'), {
+        olusturmaTarih: bugun,
+        bitisTarih,
+      });
+
       toast.success('Kayıt başarılı. Yönlendiriliyorsunuz...');
       Cookies.set('userToken', userId, { expires: 7 });
       Cookies.set('slug', slug, { expires: 7 });
@@ -126,7 +134,12 @@ const ProfilOlustur = () => {
         alt='Emlak Arka Planı'
       />
       <div className='flex w-full flex-col items-center justify-center gap-3 bg-black pt-2 md:pt-0'>
-        <img src={logo} alt='Logo' className='w-24 md:w-32' />
+        <img
+          src={logo}
+          onClick={() => navigate('/')}
+          alt='Logo'
+          className='z-50 w-24 cursor-pointer md:w-32'
+        />
         <div className='flex w-full flex-col items-center gap-1 pb-20'>
           <p className='text-3xl font-semibold text-yellow-500'>Üyelik</p>
           <p className='text-md font-medium text-gray-400'>Hesap Oluştur</p>
