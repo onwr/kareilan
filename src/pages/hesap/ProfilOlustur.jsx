@@ -28,12 +28,11 @@ const ProfilOlustur = () => {
 
     if (name === 'gsm') {
       const cleanedValue = value.replace(/\D/g, '');
+      if (!/^5\d{0,9}$/.test(cleanedValue)) return;
 
-      if (!/^5\d{0,9}$/.test(cleanedValue)) {
-        return;
-      }
-      const formattedValue = cleanedValue.replace(/(\d{3})(\d{0,3})(\d{0,2})/, '($1) $2 $3').trim();
-
+      const formattedValue = cleanedValue
+        .replace(/(\d{3})(\d{3})(\d{2})(\d{2})/, '($1) $2 $3 $4')
+        .trim();
       setFormData({ ...formData, [name]: formattedValue });
     } else {
       setFormData({ ...formData, [name]: value });
@@ -45,6 +44,12 @@ const ProfilOlustur = () => {
     setLoading(true);
 
     const { email, ad, firma, gsm, sifre, slug, kurumsal } = formData;
+
+    if (!gsm || !/^\(5\d{2}\) \d{3} \d{2} \d{2}$/.test(gsm)) {
+      toast.error('Lütfen geçerli bir GSM numarası giriniz (örneğin: (5xx) xxx xx xx)');
+      setLoading(false);
+      return;
+    }
 
     if (sifre.length < 6) {
       toast.error('Şifreniz en az 6 karakter olmalıdır');
@@ -93,14 +98,6 @@ const ProfilOlustur = () => {
         admin: false,
         durum: true,
         olusturmaTarih: new Date().toISOString(),
-      });
-
-      const bugun = Timestamp.now();
-      const bitisTarih = Timestamp.fromMillis(bugun.toMillis() + 365 * 24 * 60 * 60 * 1000);
-
-      await setDoc(doc(db, `kullanicilar/${userId}/ilan`, '000'), {
-        olusturmaTarih: bugun,
-        bitisTarih,
       });
 
       toast.success('Kayıt başarılı. Yönlendiriliyorsunuz...');

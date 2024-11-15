@@ -3,9 +3,8 @@ import {
   getDocs,
   deleteDoc,
   doc,
-  query,
-  where,
   getCountFromServer,
+  updateDoc,
 } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import { db } from 'src/db/Firebase';
@@ -16,6 +15,8 @@ const Firmalar = () => {
   const [kullanicilar, setKullanicilar] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedKullanici, setSelectedKullanici] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editForm, setEditForm] = useState({});
 
   useEffect(() => {
     const veriCek = async () => {
@@ -36,7 +37,6 @@ const Firmalar = () => {
           })
         );
 
-        console.log(kullaniciListesi);
         setKullanicilar(kullaniciListesi);
         setLoading(false);
       } catch (error) {
@@ -48,7 +48,10 @@ const Firmalar = () => {
     veriCek();
   }, []);
 
-  const closeModal = () => setSelectedKullanici(null);
+  const closeModal = () => {
+    setSelectedKullanici(null);
+    setIsEditing(false);
+  };
 
   const handleDelete = async (id) => {
     try {
@@ -67,6 +70,35 @@ const Firmalar = () => {
     } catch (error) {
       console.error('Silme işlemi sırasında hata oluştu:', error);
       toast.error('Silme işlemi sırasında bir hata oluştu.');
+    }
+  };
+
+  const handleEdit = (kullanici) => {
+    setEditForm(kullanici);
+    setIsEditing(true);
+  };
+
+  const handleFormChange = (e) => {
+    const { name, value } = e.target;
+    setEditForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSave = async () => {
+    const { id, ...updatedData } = editForm;
+    try {
+      const docRef = doc(db, 'kullanicilar', id);
+      await updateDoc(docRef, updatedData);
+
+      setKullanicilar((prev) =>
+        prev.map((kullanici) =>
+          kullanici.id === id ? { ...kullanici, ...updatedData } : kullanici
+        )
+      );
+      toast.success('Kullanıcı bilgileri başarıyla güncellendi.');
+      closeModal();
+    } catch (error) {
+      console.error('Güncelleme hatası:', error);
+      toast.error('Güncelleme sırasında bir hata oluştu.');
     }
   };
 
@@ -107,7 +139,7 @@ const Firmalar = () => {
                   <td className='px-6 py-4'>{kullanici.ad || '-'}</td>
                   <td className='px-6 py-4'>{kullanici.gsm || '-'}</td>
                   <td className='px-6 py-4'>{kullanici.email || '-'}</td>
-                  <td className='px-6 py-4'>{kullanici.afisMiktar || 0}</td>{' '}
+                  <td className='px-6 py-4'>{kullanici.afisMiktar || 0}</td>
                   <td className='px-6 py-4 text-center'>
                     <button
                       className='mr-2 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600'
@@ -144,19 +176,52 @@ const Firmalar = () => {
               transition={{ duration: 0.2 }}
               className='w-full max-w-lg rounded-lg bg-white p-6 shadow-lg'
             >
-              <h3 className='mb-4 text-lg font-bold'>Kullanıcı Detayları</h3>
-              <ul className='mb-4'>
-                {Object.entries(selectedKullanici).map(([key, value]) => (
-                  <li key={key} className='mb-2 flex justify-between'>
-                    <strong className='capitalize'>{key}:</strong>
-                    <span>{value?.toString() || '-'}</span>
-                  </li>
-                ))}
-              </ul>
-              <div className='flex justify-end gap-2'>
+              <h3 className='mb-4 text-lg font-bold'>
+                {isEditing ? 'Kullanıcıyı Düzenle' : 'Kullanıcı Detayları'}
+              </h3>
+              {!isEditing ? (
+                <ul className='mb-4'>
+                  {Object.entries(selectedKullanici).map(([key, value]) => (
+                    <li key={key} className='mb-2 flex justify-between'>
+                      <strong className='capitalize'>{key}:</strong>
+                      <span>{value?.toString() || '-'}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className='grid grid-cols-2 gap-2'>
+                  {Object.keys(editForm).map((key) => (
+                    <div key={key} className='mb-2'>
+                      <label className='block text-sm font-medium'>{key}</label>
+                      <input
+                        type='text'
+                        name={key}
+                        value={editForm[key]}
+                        onChange={handleFormChange}
+                        className='mt-1 w-full rounded border px-3 py-2'
+                      />
+                    </div>
+                  ))}
+                  <button
+                    onClick={handleSave}
+                    className='mt-4 rounded bg-green-500 px-4 py-2 text-white hover:bg-green-600'
+                  >
+                    Kaydet
+                  </button>
+                </div>
+              )}
+              <div className='mt-4 flex justify-end gap-2'>
+                {!isEditing && (
+                  <button
+                    className='rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600'
+                    onClick={() => handleEdit(selectedKullanici)}
+                  >
+                    Düzenle
+                  </button>
+                )}
                 <button
-                  className='rounded bg-red-500 px-4 py-2 text-white hover:bg-red-600'
                   onClick={closeModal}
+                  className='rounded bg-gray-500 px-4 py-2 text-white hover:bg-gray-600'
                 >
                   Kapat
                 </button>

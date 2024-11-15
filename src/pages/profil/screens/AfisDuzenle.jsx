@@ -18,7 +18,7 @@ const AfisDuzenle = ({ slug, screen, token, demo }) => {
   const [afisOlusturModal, setAfisOlusturModal] = useState(false);
   const [docId, setDocId] = useState('');
   const [isScanning, setIsScanning] = useState(false);
-  const [facingMode, setFacingMode] = useState('user');
+  const [facingMode, setFacingMode] = useState('environment');
   const [selectedCompanies, setSelectedCompanies] = useState([]);
   const [kurumsalMusteri, setKurumsalMusteri] = useState(false);
   const navigate = useNavigate();
@@ -74,11 +74,6 @@ const AfisDuzenle = ({ slug, screen, token, demo }) => {
   };
 
   const afisSorgula = async () => {
-    if (demo) {
-      toast.error('Demo modunda işlem yapılamaz.');
-      return;
-    }
-
     if (!afisLink) {
       toast.error('Lütfen geçerli bir afiş adresi girin!');
       return;
@@ -263,11 +258,6 @@ const AfisDuzenle = ({ slug, screen, token, demo }) => {
             const platformUrl =
               afisData.links?.[kisit.dbName]?.link || afisData.links?.[kisit.dbName];
 
-            if (!platformUrl) {
-              toast.error(`Eksik ${kisit.adi} URL'si.`);
-              return;
-            }
-
             if (typeof platformUrl !== 'string') {
               console.error('URL bir string değil:', platformUrl);
               toast.error(`Geçersiz ${kisit.adi} URL formatı.`);
@@ -296,7 +286,7 @@ const AfisDuzenle = ({ slug, screen, token, demo }) => {
 
   const handleScan = (data) => {
     console.log('Scanned data:', data);
-    if (data && data.text) {
+    if (data) {
       const lastPart = data.text.split('/').pop();
 
       toast.success('QR kod başarıyla tarandı!');

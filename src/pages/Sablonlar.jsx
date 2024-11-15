@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { doc, getDoc, collection, getDocs } from 'firebase/firestore';
 import { db } from 'src/db/Firebase';
 import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
 
 const Sablonlar = () => {
   const [showPopup, setShowPopup] = useState(false);
@@ -13,8 +14,8 @@ const Sablonlar = () => {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedFirma, setSelectedFirma] = useState('');
   const [kategoriList, setKategoriList] = useState([]);
+  const navigate = useNavigate();
 
-  // Şablonları çekme fonksiyonu
   const sablonCek = async () => {
     try {
       const sablonRef = collection(db, 'sablonlar');
@@ -47,10 +48,9 @@ const Sablonlar = () => {
     }
   };
 
-  // Kategorileri çekme fonksiyonu
   const fetchCategories = async () => {
     try {
-      const docRef = doc(db, 'sablonlar', 'kategoriler');
+      const docRef = doc(db, 'sablonKategori', 'kategoriler');
       const docSnap = await getDoc(docRef);
 
       if (docSnap.exists()) {
@@ -118,6 +118,13 @@ const Sablonlar = () => {
         ></motion.video>
 
         <motion.button
+          onClick={() => navigate('/hesap/panel')}
+          className='mt-2 w-full rounded bg-gray-500 py-2 font-semibold text-white hover:bg-gray-700'
+          whileHover={{ scale: 1.05 }}
+        >
+          Geri Dön
+        </motion.button>
+        <motion.button
           onClick={togglePopup}
           className='mt-2 w-full rounded bg-yellow-500 py-2 font-semibold text-white hover:bg-yellow-700'
           whileHover={{ scale: 1.05 }}
@@ -180,7 +187,7 @@ const Sablonlar = () => {
           onChange={(e) => setSelectedFirma(e.target.value)}
           className='w-full max-w-80 rounded-md border p-2'
         >
-          <option value=''>Firma Seç</option>
+          <option value=''>Firma Şablonu Seç</option>
           {kategoriList.map((kategori, index) => (
             <option key={index} value={kategori.ad}>
               {kategori.ad}

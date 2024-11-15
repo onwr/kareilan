@@ -18,7 +18,7 @@ const SablonEkle = () => {
   useEffect(() => {
     const kategoriCek = async () => {
       try {
-        const docRef = doc(db, 'sablonlar', 'kategoriler');
+        const docRef = doc(db, 'sablonKategori', 'kategoriler');
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {

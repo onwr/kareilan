@@ -10,22 +10,25 @@ const IlanFiyat = () => {
   const [fiyat, setFiyat] = useState('');
   const [editId, setEditId] = useState(null);
 
-  useEffect(() => {
-    const fetchFiyatlar = async () => {
-      try {
-        const fiyatRef = collection(db, 'fiyatlandirma');
-        const snapshot = await getDocs(fiyatRef);
-        const fiyatData = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setFiyatlar(fiyatData);
-      } catch (error) {
-        console.error('Fiyatlar alınırken hata oluştu:', error);
-        toast.error('Fiyatlar alınırken hata oluştu');
-      }
-    };
+  const fetchFiyatlar = async () => {
+    try {
+      const fiyatRef = collection(db, 'fiyatlandirma');
+      const snapshot = await getDocs(fiyatRef);
+      const fiyatData = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
 
+      fiyatData.sort((a, b) => parseInt(a.adet) - parseInt(b.adet));
+
+      setFiyatlar(fiyatData);
+    } catch (error) {
+      console.error('Fiyatlar alınırken hata oluştu:', error);
+      toast.error('Fiyatlar alınırken hata oluştu');
+    }
+  };
+
+  useEffect(() => {
     fetchFiyatlar();
   }, []);
 
@@ -66,7 +69,6 @@ const IlanFiyat = () => {
     }
   };
 
-  // Fiyat silme
   const handleDeleteFiyat = async (id) => {
     try {
       const fiyatRef = doc(db, 'fiyatlandirma', id);
@@ -79,7 +81,6 @@ const IlanFiyat = () => {
     }
   };
 
-  // Fiyatları listele
   const renderFiyatlar = () => {
     return fiyatlar.map((fiyat) => (
       <motion.tr

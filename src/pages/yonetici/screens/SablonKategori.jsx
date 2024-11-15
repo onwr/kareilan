@@ -10,7 +10,7 @@ const SablonKategori = () => {
 
   const fetchCategories = async () => {
     try {
-      const docRef = doc(db, 'sablonlar', 'kategoriler');
+      const docRef = doc(db, 'sablonKategori', 'kategoriler');
       const docSnap = await getDoc(docRef);
 
       if (docSnap.exists()) {
@@ -39,7 +39,7 @@ const SablonKategori = () => {
 
     setLoading(true);
     try {
-      const docRef = doc(db, 'sablonlar', 'kategoriler');
+      const docRef = doc(db, 'sablonKategori', 'kategoriler');
       const docSnap = await getDoc(docRef);
 
       if (docSnap.exists()) {
@@ -56,20 +56,20 @@ const SablonKategori = () => {
         };
 
         await updateDoc(docRef, updatedCategories);
-        toast.success('Yeni firma başarıyla eklendi!');
+        toast.success('Yeni Firma Şablonu başarıyla eklendi!');
 
         setKategoriList([...kategoriListData, yeniFirma]);
 
         setFirmaAdi('');
       } else {
         await setDoc(docRef, { kategoriList: [{ ad: firmaAdi }] });
-        toast.success('Yeni firma başarıyla eklendi!');
+        toast.success('Yeni Şablonu firma başarıyla eklendi!');
         setKategoriList([{ ad: firmaAdi }]);
         setFirmaAdi('');
       }
     } catch (error) {
-      console.error('Firma eklenirken hata oluştu:', error);
-      toast.error('Firma eklenemedi.');
+      console.error('Firma Şablonu eklenirken hata oluştu:', error);
+      toast.error('Firma Şablonu eklenemedi.');
     } finally {
       setLoading(false);
     }
@@ -77,30 +77,30 @@ const SablonKategori = () => {
 
   const handleDeleteFirma = async (index) => {
     try {
-      const docRef = doc(db, 'sablonlar', 'kategoriler');
+      const docRef = doc(db, 'sablonKategori', 'kategoriler');
       const filteredList = kategoriList.filter((_, i) => i !== index);
       await updateDoc(docRef, { kategoriList: filteredList });
       setKategoriList(filteredList);
-      toast.success('Firma başarıyla silindi!');
+      toast.success('Firma Şablonu başarıyla silindi!');
     } catch (error) {
-      console.error('Firma silinirken hata oluştu:', error);
-      toast.error('Firma silinemedi.');
+      console.error('Firma Şablonu silinirken hata oluştu:', error);
+      toast.error('Firma Şablonu silinemedi.');
     }
   };
 
   return (
     <div className='flex w-full max-w-screen-lg flex-col'>
       <div className='container mx-auto rounded-lg bg-white p-5 md:border'>
-        <h2 className='mb-5 text-2xl font-semibold'>Yeni Firma Ekle</h2>
+        <h2 className='mb-5 text-2xl font-semibold'>Yeni Firma Şablonu Ekle</h2>
 
         <form onSubmit={handleAddFirma} className='space-y-4'>
           <div>
-            <label className='mb-2 block text-sm font-medium'>Firma Adı</label>
+            <label className='mb-2 block text-sm font-medium'>Firma Şablonu Adı</label>
             <input
               type='text'
               value={firmaAdi}
               onChange={(e) => setFirmaAdi(e.target.value)}
-              placeholder='Firma Adı Girin'
+              placeholder='Firma Şablonu Girin'
               className='w-full rounded border p-2 focus:outline-none focus:ring focus:ring-yellow-500'
               required
             />
@@ -111,13 +111,13 @@ const SablonKategori = () => {
             className='w-full rounded bg-yellow-500 px-4 py-2 text-white hover:bg-yellow-600'
             disabled={loading}
           >
-            {loading ? 'Ekleniyor...' : 'Firma Ekle'}
+            {loading ? 'Ekleniyor...' : 'Firma Şablonu Ekle'}
           </button>
         </form>
       </div>
 
       <div className='container mt-5 rounded-lg bg-white p-5 md:border'>
-        <h2 className='mb-5 text-2xl font-semibold'>Firma Listesi</h2>
+        <h2 className='mb-5 text-2xl font-semibold'>Firma Şablonu Listesi</h2>
         <div className='grid grid-cols-3 gap-4'>
           {kategoriList.map((firma, index) => (
             <div

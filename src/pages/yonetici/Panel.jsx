@@ -26,7 +26,7 @@ const Panel = () => {
         {selectIndex === 4 && <FirmaPortalList />}
         {selectIndex === 5 && <OdemeAyar />}
         {selectIndex === 6 && <OdemeYontemleri />}
-        {selectIndex === 7 && <Firmalar />}
+        {selectIndex === 7 && <Firmalar screen={setSelectedIndex} />}
         {selectIndex === 8 && <KullaniciOlustur />}
         {selectIndex === 9 && <SablonKategori />}
         {selectIndex === 10 && <IlanFiyat />}

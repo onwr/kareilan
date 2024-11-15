@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import { db } from 'src/db/Firebase';
 import { CiCirclePlus } from 'react-icons/ci';
 import OdemeModal from 'src/modals/odemeModal';
+import { FaWhatsapp } from 'react-icons/fa6';
 
 const AfisOlustur = ({ screen, token, demo }) => {
   const [afisData, setAfisData] = useState({ iletisimBilgi: {} });
@@ -59,6 +60,8 @@ const AfisOlustur = ({ screen, token, demo }) => {
         const fiyatRef = collection(db, 'fiyatlandirma');
         const snapshot = await getDocs(fiyatRef);
         const fiyatData = snapshot.docs.map((doc) => doc.data());
+        fiyatData.sort((a, b) => parseInt(a.adet) - parseInt(b.adet));
+
         setFiyatlar(fiyatData);
       } catch (error) {
         toast.error('Fiyat bilgileri alınamadı.');
@@ -129,8 +132,8 @@ const AfisOlustur = ({ screen, token, demo }) => {
 
         <div className='mb-4'>
           <p className='rounded-t-lg bg-green-200 py-2 text-center font-semibold shadow-2xl'>
-            Oluşturduğunuz afişlerin aktif kalabilmesi için 7 gün içerisinde ödeme yapmayı
-            unutmayınız.
+            Afişleriniz oluşturulduğu anda aktiftir ve kullanılabilir. Oluşturduğunuz afişlerin
+            aktif kalabilmesi için 7 gün içerisinde ödeme yapmayı unutmayınız.
           </p>
           <button
             onClick={() => setShowModal(true)}
@@ -187,6 +190,15 @@ const AfisOlustur = ({ screen, token, demo }) => {
             <CiCirclePlus className='size-20 rounded-full duration-300 group-hover:bg-white/50' />
             <p className='text-xl font-semibold'>20 Adet Afiş Oluştur</p>
           </div>
+          <a
+            className='group flex w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border bg-gradient-to-b from-green-200 to-slate-50 p-12 ring-green-600 duration-300 hover:ring-1 md:w-auto'
+            href='https://wa.me/905345848039'
+          >
+            <FaWhatsapp className='size-20 duration-300' />
+            <p className='text-center text-sm font-semibold md:text-lg'>
+              Daha fazla afiş ihtiyacınız varsa bizimle iletişime geçin
+            </p>
+          </a>
         </div>
         <button
           onClick={() => screen(0)}
