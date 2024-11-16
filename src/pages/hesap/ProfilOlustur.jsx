@@ -1,9 +1,18 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import logo from '@images/logo.png';
 import emlak from '@images/emlak.jpg';
 import { auth, db } from '../../db/Firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { collection, doc, getDocs, query, setDoc, Timestamp, where } from 'firebase/firestore';
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  setDoc,
+  Timestamp,
+  where,
+} from 'firebase/firestore';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import Loader from 'src/layout/Loader';
@@ -20,6 +29,29 @@ const ProfilOlustur = () => {
     kurumsal: false,
   });
   const [loading, setLoading] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [metin, setMetin] = useState('');
+
+  useEffect(() => {
+    const veriCek = async () => {
+      try {
+        const docRef = doc(db, 'sozlesme', 'kullanici');
+        const getData = await getDoc(docRef);
+
+        if (getData.exists()) {
+          setMetin(getData.data());
+        } else {
+          toast.error('Bulunamadı');
+        }
+      } catch (error) {
+        toast.error('Kullanıcı sözleşmesi metni bulunamadı.');
+        console.log(error);
+      }
+    };
+
+    veriCek();
+  }, []);
 
   const navigate = useNavigate();
 
@@ -44,6 +76,12 @@ const ProfilOlustur = () => {
     setLoading(true);
 
     const { email, ad, firma, gsm, sifre, slug, kurumsal } = formData;
+
+    if (!termsAccepted) {
+      toast.error('Kullanıcı sözleşmesini kabul etmelisiniz');
+      setLoading(false);
+      return;
+    }
 
     if (!gsm || !/^\(5\d{2}\) \d{3} \d{2} \d{2}$/.test(gsm)) {
       toast.error('Lütfen geçerli bir GSM numarası giriniz (örneğin: (5xx) xxx xx xx)');
@@ -203,6 +241,17 @@ const ProfilOlustur = () => {
                   https://www.kareilan.com/<span className='text-yellow-400'>{formData.slug}</span>
                 </p>
               </div>
+              <div className='flex items-center gap-2'>
+                <input
+                  type='checkbox'
+                  className='accent-yellow-400'
+                  checked={termsAccepted}
+                  onChange={() => setTermsAccepted(!termsAccepted)}
+                />
+                <span onClick={() => setIsModalOpen(true)} className='cursor-pointer text-blue-500'>
+                  Kullanıcı Sözleşmesini kabul ediyorum.
+                </span>
+              </div>
               <button
                 type='submit'
                 className='rounded-xl bg-yellow-300 py-2 font-semibold text-black md:col-span-2'
@@ -213,6 +262,23 @@ const ProfilOlustur = () => {
           </form>
         </div>
       </div>
+
+      {isModalOpen && (
+        <div className='fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50'>
+          <div className='w-full max-w-xl rounded bg-white p-5'>
+            <p
+              className='mb-0 max-h-60 overflow-hidden overflow-y-auto rounded-lg border bg-neutral-200 p-2'
+              dangerouslySetInnerHTML={{ __html: metin.metin }}
+            ></p>{' '}
+            <button
+              className='mt-5 w-full rounded-lg bg-red-500 py-2 font-semibold text-white duration-300 hover:bg-red-600'
+              onClick={() => setIsModalOpen(false)}
+            >
+              Kapat
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

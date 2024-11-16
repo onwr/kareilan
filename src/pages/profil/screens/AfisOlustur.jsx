@@ -6,6 +6,7 @@ import { db } from 'src/db/Firebase';
 import { CiCirclePlus } from 'react-icons/ci';
 import OdemeModal from 'src/modals/odemeModal';
 import { FaWhatsapp } from 'react-icons/fa6';
+import NasilKullanilir from './modals/NasilKullanilir';
 
 const AfisOlustur = ({ screen, token, demo }) => {
   const [afisData, setAfisData] = useState({ iletisimBilgi: {} });
@@ -14,6 +15,7 @@ const AfisOlustur = ({ screen, token, demo }) => {
   const [maxAfisLimit, setMaxAfisLimit] = useState(0);
   const [showModal, setShowModal] = useState(false);
   const [fiyatlar, setFiyatlar] = useState([]);
+  const [howToUseModal, setHowToUseModal] = useState(false);
 
   useEffect(() => {
     const kurumsalCheck = async () => {
@@ -123,9 +125,15 @@ const AfisOlustur = ({ screen, token, demo }) => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
-        className='mt-5'
+        className='relative mt-5'
       >
-        <h2 className='mb-2 text-xl font-semibold'>Afiş Satın Al</h2>
+        <button
+          onClick={() => setHowToUseModal(true)}
+          className='absolute right-0 top-0 cursor-pointer rounded-lg bg-gradient-to-r from-red-400 to-red-600 p-2 text-xs text-white hover:to-red-200'
+        >
+          Nasıl Kullanılır
+        </button>
+        <h2 className='mb-2 text-xl font-semibold'>Afiş Oluştur</h2>
         <p className='mb-2 rounded-xl bg-yellow-500/20 p-2 text-center'>
           Kalan Afiş Hakkı <span className='font-bold'>{maxAfisLimit - ilanSayisi}</span>
         </p>
@@ -200,6 +208,13 @@ const AfisOlustur = ({ screen, token, demo }) => {
             </p>
           </a>
         </div>
+
+        <NasilKullanilir
+          show={howToUseModal}
+          onClose={() => setHowToUseModal(false)}
+          sayfa='afisolustur'
+        />
+
         <button
           onClick={() => screen(0)}
           className='mt-5 w-full rounded-xl bg-black/50 py-2 font-semibold text-white'

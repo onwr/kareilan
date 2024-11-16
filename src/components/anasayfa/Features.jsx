@@ -20,8 +20,8 @@ const Features = () => {
           <MdOutlineHomeWork className='size-20 text-black/70' />
           <p className='text-center text-lg font-semibold'>Bir Afiş Pek Çok Taşınmaz</p>
           <p className='text-center text-sm'>
-            Afilerinizi farklı taşınmazlarınız için tekrar tekrar kullanın, sadece QR kodunuzu
-            güncelleyin
+            QR kodunuzdaki bilgileri telefonunuzdan güncelleyerek afişlerinizi farklı
+            taşınmazlarınız için tekrar tekrar kullanın.
           </p>
         </div>
         <div className='flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border bg-gradient-to-b from-black/10 to-yellow-800/10 p-16 duration-300 hover:scale-105'>

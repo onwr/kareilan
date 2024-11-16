@@ -5,6 +5,7 @@ import { doc, getDoc, collection, getDocs } from 'firebase/firestore';
 import { db } from 'src/db/Firebase';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
+import NasilKullanilir from './profil/screens/modals/NasilKullanilir';
 
 const Sablonlar = () => {
   const [showPopup, setShowPopup] = useState(false);
@@ -14,6 +15,7 @@ const Sablonlar = () => {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedFirma, setSelectedFirma] = useState('');
   const [kategoriList, setKategoriList] = useState([]);
+  const [howToUseModal, setHowToUseModal] = useState(false);
   const navigate = useNavigate();
 
   const sablonCek = async () => {
@@ -123,6 +125,13 @@ const Sablonlar = () => {
           whileHover={{ scale: 1.05 }}
         >
           Geri Dön
+        </motion.button>
+        <motion.button
+          onClick={() => setHowToUseModal(true)}
+          className='mt-2 w-full rounded bg-gradient-to-r from-red-400 to-red-600 p-2 font-semibold text-white hover:to-red-200'
+          whileHover={{ scale: 1.05 }}
+        >
+          Nasıl Kullanılır
         </motion.button>
         <motion.button
           onClick={togglePopup}
@@ -279,6 +288,12 @@ const Sablonlar = () => {
           </motion.div>
         ))}
       </div>
+
+      <NasilKullanilir
+        show={howToUseModal}
+        onClose={() => setHowToUseModal(false)}
+        sayfa='sablonlar'
+      />
     </motion.div>
   );
 };

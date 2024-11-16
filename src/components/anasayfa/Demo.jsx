@@ -23,7 +23,7 @@ const Demo = () => {
               onClick={hesapGiris}
               className='rounded-xl bg-yellow-400 p-5 font-medium duration-300 hover:bg-yellow-500'
             >
-              Demo Hesaba Giriş
+              Tura Başlayın
             </button>
           </div>
         )}

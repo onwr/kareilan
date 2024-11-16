@@ -8,6 +8,7 @@ import { SiCanva } from 'react-icons/si';
 import AfisIndir from './modals/AfisIndir';
 import { useNavigate } from 'react-router-dom';
 import { FaRegCopy } from 'react-icons/fa6';
+import NasilKullanilir from './modals/NasilKullanilir';
 
 const AfisDuzenle = ({ slug, screen, token, demo }) => {
   const [afisLink, setAfisLink] = useState('');
@@ -21,6 +22,7 @@ const AfisDuzenle = ({ slug, screen, token, demo }) => {
   const [facingMode, setFacingMode] = useState('environment');
   const [selectedCompanies, setSelectedCompanies] = useState([]);
   const [kurumsalMusteri, setKurumsalMusteri] = useState(false);
+  const [howToUseModal, setHowToUseModal] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -261,17 +263,14 @@ const AfisDuzenle = ({ slug, screen, token, demo }) => {
       for (const data of firmalar) {
         if (data.kisitlar) {
           for (const kisit of data.kisitlar) {
-            // Afis Data içindeki linkleri kontrol et
             const platformUrl =
               afisData.links?.[kisit.dbName]?.link || afisData.links?.[kisit.dbName];
 
-            // Eğer platformUrl undefined ise kontrolü atla
             if (platformUrl === undefined) {
               console.warn(`Uyarı: ${kisit.dbName} için URL bulunamadı, kontrol atlanıyor.`);
-              continue; // Bir sonraki firmaya geç
+              continue;
             }
 
-            // Debug: platformUrl'nin tipini kontrol et
             console.log(`Kontrol Ediliyor - Platform: ${kisit.dbName}, URL:`, platformUrl);
 
             if (typeof platformUrl !== 'string' || !platformUrl) {
@@ -280,10 +279,9 @@ const AfisDuzenle = ({ slug, screen, token, demo }) => {
                 platformUrl
               );
               toast.error(`Geçersiz ${kisit.adi} URL formatı.`);
-              return; // Eğer geçersizse güncellemeyi durdur
+              return;
             }
 
-            // URL'nin doğruluğunu kontrol et
             const isValid = validateUrl(platformUrl, kisit.dbName);
             console.log(`URL doğrulandı mı (${kisit.dbName}):`, isValid);
 
@@ -295,7 +293,6 @@ const AfisDuzenle = ({ slug, screen, token, demo }) => {
         }
       }
 
-      // Firestore güncelleme işlemi
       const ilanRef = doc(db, `kullanicilar/${token}/ilan/${docId}`);
       await updateDoc(ilanRef, afisData);
       toast.success('Veriler başarıyla güncellendi!');
@@ -329,8 +326,14 @@ const AfisDuzenle = ({ slug, screen, token, demo }) => {
   };
 
   return (
-    <div className='mt-5'>
+    <div className='relative mt-5'>
       <div className='flex flex-col items-center'>
+        <button
+          onClick={() => setHowToUseModal(true)}
+          className='absolute right-0 top-0 cursor-pointer rounded-lg bg-gradient-to-r from-red-400 to-red-600 p-2 text-xs text-white hover:to-red-200'
+        >
+          Nasıl Kullanılır
+        </button>
         <p className='text-center text-2xl font-semibold underline'>Afişi Düzenle</p>
         {isScanning ? (
           <div className='mt-5 flex flex-col items-center'>
@@ -610,6 +613,11 @@ const AfisDuzenle = ({ slug, screen, token, demo }) => {
           </>
         )}
       </div>
+      <NasilKullanilir
+        show={howToUseModal}
+        onClose={() => setHowToUseModal(false)}
+        sayfa='afisduzenle'
+      />
       {afisOlusturModal && <AfisIndir slug={slug} docId={docId} onClose={onCloseModal} />}
     </div>
   );

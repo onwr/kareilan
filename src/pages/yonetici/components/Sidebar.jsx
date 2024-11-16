@@ -12,6 +12,9 @@ const Sidebar = ({ screen }) => {
   const [isKisitDropdownOpen, setIsKisitDropdownOpen] = useState(false);
   const [isSablonDropdownOpen, setIsSablonDropdownOpen] = useState(false);
   const [isOdemeDropDown, setIsOdemeDropDown] = useState(false);
+  const [isSozlesmeDropDown, setIsSozlesmeDropDown] = useState(false);
+  const [isEgitimVideolarDropDown, setIsEgitimVideolarDropDown] = useState(false);
+
   const navigate = useNavigate();
 
   const dropdownVariants = {
@@ -220,6 +223,74 @@ const Sidebar = ({ screen }) => {
                       className='block w-full px-4 py-2 hover:bg-gray-100'
                     >
                       Aktif Ödeme Yöntemleri
+                    </button>
+                  </li>
+                </ul>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        <div className='mt-5 w-full px-4'>
+          <button
+            onClick={() => setIsSozlesmeDropDown(!isSozlesmeDropDown)}
+            className='flex w-full items-center justify-between rounded bg-yellow-500 px-4 py-2 font-semibold text-white hover:bg-yellow-600'
+          >
+            <span>Sözleşmeler</span>
+            {isSozlesmeDropDown ? <FaArrowUp /> : <FaArrowDown />}
+          </button>
+
+          <AnimatePresence>
+            {isSozlesmeDropDown && (
+              <motion.div
+                className='overflow-hidden rounded bg-white shadow-lg'
+                initial='hidden'
+                animate='visible'
+                exit='hidden'
+                variants={dropdownVariants}
+                transition={{ duration: 0.3, ease: 'easeInOut' }}
+              >
+                <ul className='flex flex-col'>
+                  <li>
+                    <button
+                      onClick={() => screen(11)}
+                      className='block w-full px-4 py-2 hover:bg-gray-100'
+                    >
+                      Kullanıcı Sözleşmesi
+                    </button>
+                  </li>
+                </ul>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        <div className='mt-5 w-full px-4'>
+          <button
+            onClick={() => setIsEgitimVideolarDropDown(!isEgitimVideolarDropDown)}
+            className='flex w-full items-center justify-between rounded bg-yellow-500 px-4 py-2 font-semibold text-white hover:bg-yellow-600'
+          >
+            <span>Nasıl Kullanılır</span>
+            {isEgitimVideolarDropDown ? <FaArrowUp /> : <FaArrowDown />}
+          </button>
+
+          <AnimatePresence>
+            {isEgitimVideolarDropDown && (
+              <motion.div
+                className='overflow-hidden rounded bg-white shadow-lg'
+                initial='hidden'
+                animate='visible'
+                exit='hidden'
+                variants={dropdownVariants}
+                transition={{ duration: 0.3, ease: 'easeInOut' }}
+              >
+                <ul className='flex flex-col'>
+                  <li>
+                    <button
+                      onClick={() => screen(12)}
+                      className='block w-full px-4 py-2 hover:bg-gray-100'
+                    >
+                      Videolar
                     </button>
                   </li>
                 </ul>

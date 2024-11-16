@@ -15,6 +15,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import AfisOlustur from './screens/AfisOlustur';
 import AfisDuzenle from './screens/AfisDuzenle';
+import NasilKullanilir from './screens/modals/NasilKullanilir';
 
 const Profilim = ({ demo }) => {
   const [loading, setLoading] = useState(false);
@@ -24,6 +25,7 @@ const Profilim = ({ demo }) => {
   const slug = Cookies.get('slug');
   const navigate = useNavigate();
   const [selectScreen, setSelectScreen] = useState(0);
+  const [howToUseModal, setHowToUseModal] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -157,19 +159,20 @@ const Profilim = ({ demo }) => {
               <p className='mt-2 text-center text-xl font-semibold'>Profil</p>
             </div>
             <div
+              onClick={() => setSelectScreen(2)}
+              className='group flex cursor-pointer flex-col items-center justify-center rounded-xl border bg-yellow-200 p-5 ring-2 ring-yellow-400 ring-offset-2 duration-300 hover:ring-4 hover:ring-black/20'
+            >
+              <IoAddCircleOutline className='size-20 rounded-full duration-300 group-hover:text-black/50 md:size-32' />
+              <p className='mt-2 text-center text-xl font-semibold'>Afiş Oluştur</p>
+            </div>
+            <div
               onClick={() => setSelectScreen(3)}
               className='group flex cursor-pointer flex-col items-center justify-center rounded-xl border bg-yellow-200 p-5 ring-2 ring-yellow-400 ring-offset-2 duration-300 hover:ring-4 hover:ring-black/20'
             >
               <MdModeEdit className='size-20 rounded-full duration-300 group-hover:text-black/50' />
               <p className='mt-2 text-center text-xl font-semibold'>Afiş Düzenle</p>
             </div>
-            <div
-              onClick={() => setSelectScreen(2)}
-              className='group flex cursor-pointer flex-col items-center justify-center rounded-xl border bg-yellow-200 p-5 ring-2 ring-yellow-400 ring-offset-2 duration-300 hover:ring-4 hover:ring-black/20'
-            >
-              <IoAddCircleOutline className='size-20 rounded-full duration-300 group-hover:text-black/50 md:size-32' />
-              <p className='mt-2 text-center text-xl font-semibold'>Afiş Satın Al</p>
-            </div>
+
             <div
               onClick={() => navigate('/sablonlar')}
               className='group flex cursor-pointer flex-col items-center justify-center rounded-xl border bg-yellow-200 p-5 ring-2 ring-yellow-400 ring-offset-2 duration-300 hover:ring-4 hover:ring-black/20'
@@ -184,8 +187,14 @@ const Profilim = ({ demo }) => {
             initial={{ opacity: 0, x: 0 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5 }}
-            className='mt-5'
+            className='relative mt-5'
           >
+            <button
+              onClick={() => setHowToUseModal(true)}
+              className='absolute right-0 top-0 cursor-pointer rounded-lg bg-gradient-to-r from-red-400 to-red-600 p-2 text-xs text-white hover:to-red-200'
+            >
+              Nasıl Kullanılır
+            </button>
             <h2 className='mb-4 text-xl font-semibold'>Profil Bilgilerini Güncelle</h2>
             <form className='grid grid-cols-1 gap-4'>
               <input
@@ -242,6 +251,11 @@ const Profilim = ({ demo }) => {
               >
                 Geri Dön
               </button>
+              <NasilKullanilir
+                show={howToUseModal}
+                onClose={() => setHowToUseModal(false)}
+                sayfa='profil'
+              />{' '}
             </form>
           </motion.div>
         ) : selectScreen === 2 ? (

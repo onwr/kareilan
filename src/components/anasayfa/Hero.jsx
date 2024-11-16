@@ -5,7 +5,6 @@ import { IoGitNetworkSharp } from 'react-icons/io5';
 import { motion } from 'framer-motion';
 import { LuLogIn } from 'react-icons/lu';
 import emlakBg from '@images/emlak.jpg';
-import { AiFillInstagram, AiOutlineYoutube } from 'react-icons/ai';
 
 const Hero = () => {
   return (
@@ -80,27 +79,6 @@ const Hero = () => {
         >
           Nasıl Çalışır
           <IoGitNetworkSharp />
-        </motion.a>
-      </div>
-
-      <div className='z-50 my-3 flex items-center gap-5'>
-        <motion.a
-          href='https://www.youtube.com/@kareilan'
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          whileHover={{ scale: 1.2, rotate: 10 }}
-          transition={{ duration: 0.5 }}
-        >
-          <AiOutlineYoutube className='rounded-lg bg-red-500 p-1 text-4xl text-white' />
-        </motion.a>
-        <motion.a
-          href='https://www.instagram.com/karekodilan'
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          whileHover={{ scale: 1.2, rotate: -10 }}
-          transition={{ duration: 0.5 }}
-        >
-          <AiFillInstagram className='rounded-lg bg-gradient-to-r from-yellow-500 via-pink-500 to-purple-500 p-1 text-4xl text-white' />
         </motion.a>
       </div>
     </div>
