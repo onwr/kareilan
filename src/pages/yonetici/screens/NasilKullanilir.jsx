@@ -1,12 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { db } from 'src/db/Firebase';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import toast from 'react-hot-toast';
 
 const NasilKullanilir = () => {
   const [afisOlusturUrl, setAfisOlusturUrl] = useState('');
   const [profilUrl, setProfilUrl] = useState('');
   const [afisDuzenleUrl, setAfisDuzenleUrl] = useState('');
   const [sablonlarUrl, setSablonlarUrl] = useState('');
+  const [anasayfaUrl, setAnasayfaUrl] = useState('');
+  const [butonMetni, setButonMetni] = useState('');
+  const [butonAktif, setButonAktif] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -22,7 +26,9 @@ const NasilKullanilir = () => {
           setProfilUrl(data.profil || '');
           setAfisDuzenleUrl(data.afisduzenle || '');
           setSablonlarUrl(data.sablonlar || '');
-          setSablonlarUrl(data.anasayfatanitim || '');
+          setAnasayfaUrl(data.anasayfatanitim || '');
+          setButonMetni(data.anasayfaVideoButonMetni || 'Tanıtım Videosu');
+          setButonAktif(data.anasayfaVideoButonAktif || false);
         }
       } catch (error) {
         console.error('Veri çekilirken hata oluştu:', error);
@@ -38,9 +44,9 @@ const NasilKullanilir = () => {
     try {
       const docRef = doc(db, 'nasilkullanilir', 'video');
       await updateDoc(docRef, { [field]: value });
-      alert('Video bağlantısı başarıyla güncellendi!');
+      toast.success('Bilgiler başarıyla güncellendi!');
     } catch (error) {
-      console.error('Video bağlantısı güncellenirken hata oluştu:', error);
+      console.error('Güncelleme sırasında hata oluştu:', error);
     }
   };
 
@@ -118,21 +124,55 @@ const NasilKullanilir = () => {
           </button>
         </label>
 
-        <label className='mb-2 block'>
-          Anasayfa Video URL:
-          <input
-            type='text'
-            value={sablonlarUrl}
-            onChange={(e) => setSablonlarUrl(e.target.value)}
-            className='mt-1 w-full rounded-lg border-gray-300 bg-yellow-100 p-2 outline-none ring-yellow-300 duration-300 focus:ring-1'
-          />
-          <button
-            onClick={() => handleUpdate('anasayfatanitim', sablonlarUrl)}
-            className='mt-2 rounded-lg bg-blue-500 px-4 py-2 text-white hover:bg-blue-600'
-          >
-            Güncelle
-          </button>
-        </label>
+        <div className='rounded-md border bg-neutral-100 p-2'>
+          <label className='mb-2 block'>
+            Anasayfa Video URL:
+            <input
+              type='text'
+              value={sablonlarUrl}
+              onChange={(e) => setSablonlarUrl(e.target.value)}
+              className='mt-1 w-full rounded-lg border-gray-300 bg-yellow-100 p-2 outline-none ring-yellow-300 duration-300 focus:ring-1'
+            />
+            <button
+              onClick={() => handleUpdate('anasayfatanitim', sablonlarUrl)}
+              className='mt-2 rounded-lg bg-blue-500 px-4 py-2 text-white hover:bg-blue-600'
+            >
+              Güncelle
+            </button>
+          </label>
+
+          <label className='mb-2 block'>
+            Buton Metni:
+            <input
+              type='text'
+              value={butonMetni}
+              onChange={(e) => setButonMetni(e.target.value)}
+              className='mt-1 w-full rounded-lg border-gray-300 bg-yellow-100 p-2 outline-none ring-yellow-300 duration-300 focus:ring-1'
+            />
+            <button
+              onClick={() => handleUpdate('anasayfaVideoButonMetni', butonMetni)}
+              className='mt-2 rounded-lg bg-green-500 px-4 py-2 text-white hover:bg-green-600'
+            >
+              Buton Metnini Güncelle
+            </button>
+          </label>
+
+          <label className='mb-2 block'>
+            Buton Aktif/Pasif:
+            <select
+              value={butonAktif}
+              onChange={(e) => {
+                const isActive = e.target.value === 'true';
+                setButonAktif(isActive);
+                handleUpdate('anasayfaVideoButonAktif', isActive);
+              }}
+              className='mt-1 w-full rounded-lg border-gray-300 bg-yellow-100 p-2 outline-none'
+            >
+              <option value='true'>Aktif</option>
+              <option value='false'>Pasif</option>
+            </select>
+          </label>
+        </div>
       </div>
     </div>
   );

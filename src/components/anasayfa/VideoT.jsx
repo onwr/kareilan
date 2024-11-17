@@ -1,10 +1,11 @@
 import { doc, getDoc } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
-import { FaPlay, FaPause } from 'react-icons/fa';
 import { db } from 'src/db/Firebase';
 
 const VideoT = () => {
-  const [videoEmbed, setVideoEmbed] = useState('');
+  const [videoUrl, setVideoUrl] = useState('');
+  const [butonMetni, setButonMetni] = useState('');
+  const [butonAktif, setButonAktif] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -12,10 +13,15 @@ const VideoT = () => {
       try {
         const docRef = doc(db, 'nasilkullanilir', 'video');
         const getSnap = await getDoc(docRef);
-        const videoUrl = getSnap.data().anasayfatanitim;
-        setVideoEmbed(videoUrl);
+
+        if (getSnap.exists()) {
+          const data = getSnap.data();
+          setVideoUrl(data.anasayfatanitim || '');
+          setButonMetni(data.anasayfaVideoButonMetni || 'Tanıtım Videosunu İzle');
+          setButonAktif(data.anasayfaVideoButonAktif || false);
+        }
       } catch (error) {
-        console.error(error);
+        console.error('Veri çekilirken hata oluştu:', error);
       } finally {
         setIsLoading(false);
       }
@@ -25,21 +31,22 @@ const VideoT = () => {
   }, []);
 
   return (
-    <div className='flex h-screen items-center justify-center'>
+    <div className='flex items-center justify-center'>
       {isLoading ? (
         <div className='flex items-center justify-center'>
           <div className='h-16 w-16 animate-spin rounded-full border-b-4 border-t-4 border-blue-500'></div>
         </div>
       ) : (
-        videoEmbed && (
-          <iframe
-            src={videoEmbed}
-            title='Tanıtım Videosu'
-            frameBorder='0'
-            allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture'
-            allowFullScreen
-            className='container h-full w-full md:rounded-xl'
-          ></iframe>
+        butonAktif &&
+        videoUrl && (
+          <a
+            href={videoUrl}
+            target='_blank'
+            rel='noopener noreferrer'
+            className='w-full max-w-3xl rounded-lg bg-gradient-to-r from-red-400 to-red-600 px-6 py-3 text-center font-semibold text-white transition'
+          >
+            {butonMetni}
+          </a>
         )
       )}
     </div>
