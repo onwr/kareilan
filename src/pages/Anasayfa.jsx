@@ -4,6 +4,7 @@ import Hero from '@components/anasayfa/Hero';
 import HowItWork from '@components/anasayfa/HowItWork';
 import Start from '@components/anasayfa/Start';
 import Video from '@components/anasayfa/Video';
+import VideoT from '@components/anasayfa/VideoT';
 import Footer from '@components/Footer';
 import React from 'react';
 
@@ -12,6 +13,7 @@ const Anasayfa = () => {
     <div>
       <Hero />
       <Video />
+      <VideoT />
       <Features />
       <Demo />
       <HowItWork />

@@ -154,7 +154,7 @@ const AfisDuzenle = ({ slug, screen, token, demo }) => {
       links: {
         ...prev.links,
         [company]: {
-          ...prev.links[company],
+          ...prev.links?.[company],
           [key]: value,
           imageUrl: imageUrl,
         },
@@ -259,6 +259,16 @@ const AfisDuzenle = ({ slug, screen, token, demo }) => {
       console.log('Güncelleme başlatıldı');
       console.log('Afis Data:', afisData);
       console.log('Firmalar:', firmalar);
+
+      const cleanedLinks = {};
+      Object.keys(afisData.links || {}).forEach((platform) => {
+        const link = afisData.links[platform]?.link;
+        if (link && typeof link === 'string' && link.trim() !== '') {
+          cleanedLinks[platform] = afisData.links[platform];
+        }
+      });
+
+      afisData.links = cleanedLinks;
 
       for (const data of firmalar) {
         if (data.kisitlar) {
@@ -532,13 +542,13 @@ const AfisDuzenle = ({ slug, screen, token, demo }) => {
               >
                 Afişi İndir
               </button>
-              <button
-                type='button'
-                onClick={() => navigate('/sablonlar')}
+              <a
+                target='_blank'
+                href='/sablonlar'
                 className='flex w-full items-center justify-center gap-2 rounded-lg border-2 border-yellow-400 px-5 py-2 text-xs font-medium duration-300 hover:bg-yellow-100 md:text-base'
               >
                 Şablonlara Git <SiCanva size='24' />
-              </button>
+              </a>
             </div>
             <div className='mx-auto flex items-center justify-center gap-2 rounded-xl bg-yellow-300 px-5 py-2'>
               kareilan.com/{slug}/{afisLink}{' '}

@@ -22,6 +22,7 @@ const NasilKullanilir = () => {
           setProfilUrl(data.profil || '');
           setAfisDuzenleUrl(data.afisduzenle || '');
           setSablonlarUrl(data.sablonlar || '');
+          setSablonlarUrl(data.anasayfatanitim || '');
         }
       } catch (error) {
         console.error('Veri çekilirken hata oluştu:', error);
@@ -111,6 +112,22 @@ const NasilKullanilir = () => {
           />
           <button
             onClick={() => handleUpdate('sablonlar', sablonlarUrl)}
+            className='mt-2 rounded-lg bg-blue-500 px-4 py-2 text-white hover:bg-blue-600'
+          >
+            Güncelle
+          </button>
+        </label>
+
+        <label className='mb-2 block'>
+          Anasayfa Video URL:
+          <input
+            type='text'
+            value={sablonlarUrl}
+            onChange={(e) => setSablonlarUrl(e.target.value)}
+            className='mt-1 w-full rounded-lg border-gray-300 bg-yellow-100 p-2 outline-none ring-yellow-300 duration-300 focus:ring-1'
+          />
+          <button
+            onClick={() => handleUpdate('anasayfatanitim', sablonlarUrl)}
             className='mt-2 rounded-lg bg-blue-500 px-4 py-2 text-white hover:bg-blue-600'
           >
             Güncelle

@@ -29,7 +29,7 @@ const Demo = () => {
         )}
         {selectScreen === 1 && (
           <div className='relative w-full rounded-xl'>
-            <Profilim demo={true} />
+            <Profilim demoScreen={setSelectScreen} demo={true} />
           </div>
         )}
       </div>

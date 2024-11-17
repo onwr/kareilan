@@ -17,7 +17,7 @@ import AfisOlustur from './screens/AfisOlustur';
 import AfisDuzenle from './screens/AfisDuzenle';
 import NasilKullanilir from './screens/modals/NasilKullanilir';
 
-const Profilim = ({ demo }) => {
+const Profilim = ({ demo, demoScreen }) => {
   const [loading, setLoading] = useState(false);
   const [emlak, setEmlak] = useState({});
   const [formData, setFormData] = useState({});
@@ -133,8 +133,15 @@ const Profilim = ({ demo }) => {
           </div>
           <div
             onClick={() => {
-              Cookies.remove('userToken');
-              navigate('/hesap/giris');
+              if (demo === true) {
+                Cookies.remove('userToken');
+                Cookies.remove('slug');
+                demoScreen(0);
+              } else {
+                Cookies.remove('userToken');
+                Cookies.remove('slug');
+                navigate('/hesap/giris');
+              }
             }}
             className='absolute right-0 top-0 flex cursor-pointer items-center gap-1 rounded-full border bg-yellow-200 p-2 text-black duration-300 hover:bg-black hover:text-white'
           >
