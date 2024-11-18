@@ -213,11 +213,11 @@ const Sablonlar = () => {
       >
         YATAY AFİŞLER
       </motion.p>
-      <div className='container mt-3 grid grid-cols-2 gap-5 lg:grid-cols-3'>
+      <div className='container px-2 md:px-0 mt-3 grid grid-cols-1 gap-5 lg:grid-cols-3'>
         {filterTemplates(yataySablon).map((item, index) => (
           <motion.div
             key={index}
-            className='flex flex-col items-center gap-3 bg-neutral-100 p-4'
+            className='flex flex-col rounded-md border h-fit items-center gap-3 bg-neutral-100 p-4'
             whileHover={{ scale: 1.05 }}
           >
             <img src={item.link} className='w-40' alt={`Yatay Afiş ${index + 1}`} />
@@ -241,11 +241,11 @@ const Sablonlar = () => {
       >
         DİKEY AFİŞLER
       </motion.p>
-      <div className='container mt-3 grid grid-cols-2 gap-5 lg:grid-cols-3'>
+      <div className='container px-2 md:px-0 mt-3 grid grid-cols-1 gap-5 lg:grid-cols-3'>
         {filterTemplates(dikeySablon).map((item, index) => (
           <motion.div
             key={index}
-            className='flex flex-col items-center gap-3 bg-neutral-100 p-4'
+            className='flex flex-col h-fit rounded-md border items-center gap-3 bg-neutral-100 p-4'
             whileHover={{ scale: 1.05 }}
           >
             <img src={item.link} className='w-40' alt={`Dikey Afiş ${index + 1}`} />
