@@ -6,7 +6,6 @@ import scan from '../../../images/icons/scan.png';
 import QrScanner from 'react-qr-scanner';
 import { SiCanva } from 'react-icons/si';
 import AfisIndir from './modals/AfisIndir';
-import { useNavigate } from 'react-router-dom';
 import { FaRegCopy } from 'react-icons/fa6';
 import NasilKullanilir from './modals/NasilKullanilir';
 
@@ -23,7 +22,22 @@ const AfisDuzenle = ({ slug, screen, token, demo }) => {
   const [selectedCompanies, setSelectedCompanies] = useState([]);
   const [kurumsalMusteri, setKurumsalMusteri] = useState(false);
   const [howToUseModal, setHowToUseModal] = useState(false);
-  const navigate = useNavigate();
+  const [ilanData, setIlanData] = useState([]);
+
+  useEffect(() => {
+    const fetchIlanSayisi = async () => {
+      try {
+        const ilanRef = collection(doc(db, 'kullanicilar', token), 'ilan');
+        const snapshot = await getDocs(ilanRef);
+        const snapData = snapshot.docs.map((doc) => doc.data());
+        setIlanData(snapData);
+      } catch (error) {
+        toast.error('İlan sayısı alınamadı.');
+      }
+    };
+
+    fetchIlanSayisi();
+  }, [token]);
 
   useEffect(() => {
     const fetchFirmalar = async () => {
@@ -107,6 +121,28 @@ const AfisDuzenle = ({ slug, screen, token, demo }) => {
     }
   };
 
+  const handleAfisSifirla = async (id) => {
+    try {
+      setAfisData({
+        links: {},
+        baslik: '',
+        aciklama: '',
+      });
+
+      const ilanRef = doc(db, `kullanicilar/${token}/ilan/${id}`);
+      await updateDoc(ilanRef, {
+        links: {},
+        baslik: '',
+        aciklama: '',
+      });
+
+      toast.success('Afiş sıfırlandı.');
+    } catch (error) {
+      console.log(error);
+      toast.error('Afiş güncellenirken hata oluştu.');
+    }
+  };
+
   const afisSorgulaQR = async (afisAdres) => {
     if (demo) {
       toast.error('Demo modunda işlem yapılamaz.');
@@ -135,6 +171,33 @@ const AfisDuzenle = ({ slug, screen, token, demo }) => {
     }
   };
 
+  const afisSorgulaHome = async (afisAdres) => {
+    if (demo) {
+      toast.error('Demo modunda işlem yapılamaz.');
+      return;
+    }
+
+    if (!afisAdres) {
+      toast.error('Lütfen geçerli bir afiş adresi girin!');
+      return;
+    }
+
+    try {
+      const ilanRef = doc(db, `kullanicilar/${token}/ilan/${afisAdres}`);
+      const ilanDoc = await getDoc(ilanRef);
+
+      if (ilanDoc.exists()) {
+        setAfisData(ilanDoc.data() || { links: {} });
+        toast.success('İlan verisi getirildi!');
+        setVeriGetirildi(true);
+      } else {
+        toast.error('Bu numaraya ait ilan bulunamadı.');
+      }
+    } catch (error) {
+      toast.error('Veri sorgulama sırasında hata oluştu.');
+      console.error('Hata:', error);
+    }
+  };
   const handleCopy = () => {
     const link = `https://kareilan.com/${slug}/${afisLink}`;
     navigator.clipboard.writeText(link);
@@ -244,7 +307,7 @@ const AfisDuzenle = ({ slug, screen, token, demo }) => {
     return false;
   };
 
-  const handleUpdate = async () => {
+  const handleUpdate = async (docId) => {
     if (demo) {
       toast.error('Demo modunda işlem yapılamaz.');
       return;
@@ -534,13 +597,19 @@ const AfisDuzenle = ({ slug, screen, token, demo }) => {
               </div>
             </div>
 
-            <div className='mt-2 grid grid-cols-1 items-center justify-center gap-2 md:grid-cols-2 lg:flex'>
+            <div className='mt-2 grid grid-cols-1 items-center justify-center gap-2 md:grid-cols-3 lg:flex'>
               <button
                 type='button'
                 onClick={() => setAfisOlusturModal(true)}
                 className='w-full rounded-lg border-2 border-yellow-400 px-2 py-2 text-xs font-medium duration-300 hover:bg-yellow-100 md:px-5 md:text-base'
               >
                 Afişi İndir
+              </button>
+              <button
+                onClick={() => handleAfisSifirla(afisData.docId)}
+                className='w-full rounded-lg border-2 border-yellow-400 px-2 py-2 text-xs font-medium duration-300 hover:bg-yellow-100 md:px-5 md:text-base'
+              >
+                Afişi Sıfırla
               </button>
               <a
                 target='_blank'
@@ -551,7 +620,7 @@ const AfisDuzenle = ({ slug, screen, token, demo }) => {
               </a>
             </div>
             <div className='mx-auto flex items-center justify-center gap-2 rounded-xl bg-yellow-300 px-5 py-2'>
-              kareilan.com/{slug}/{afisLink}{' '}
+              kareilan.com/{slug}/{afisData.docId}{' '}
               <FaRegCopy
                 onClick={handleCopy}
                 className='cursor-pointer text-black/50 duration-300 hover:text-black'
@@ -560,7 +629,7 @@ const AfisDuzenle = ({ slug, screen, token, demo }) => {
             <div className='flex items-center gap-1'>
               <button
                 type='button'
-                onClick={handleUpdate}
+                onClick={() => handleUpdate(afisData.docId)}
                 className='w-full rounded-xl bg-green-500 p-2 font-semibold text-white duration-300 hover:bg-green-700'
               >
                 Güncelle
@@ -619,6 +688,38 @@ const AfisDuzenle = ({ slug, screen, token, demo }) => {
               >
                 Geri Dön
               </button>
+            </div>
+
+            <div className='relative my-5 flex w-full items-center justify-center'>
+              <div className='absolute h-1 w-full bg-black'></div>
+              <span className='z-50 bg-white px-3 font-bold text-black'>VEYA</span>
+            </div>
+
+            <div className='flex max-h-40 w-full flex-col gap-4 overflow-hidden overflow-y-auto rounded border bg-black/30 p-3'>
+              {ilanData.map((ilan, index) => (
+                <div
+                  key={index}
+                  className='flex flex-col items-center justify-between rounded-xl bg-white px-5 py-2 md:flex-row'
+                >
+                  <p className='text-sm font-semibold'>
+                    {ilan.docId} - {ilan.baslik ? ilan.baslik : 'Boş Afiş'}
+                  </p>
+                  <div className='flex gap-5'>
+                    <button
+                      onClick={() => afisSorgulaHome(ilan.docId)}
+                      className='rounded-xl bg-blue-500 px-4 py-1 text-white duration-300 hover:bg-blue-600'
+                    >
+                      Düzenle
+                    </button>
+                    <button
+                      onClick={() => handleAfisSifirla(ilan.docId)}
+                      className='rounded-xl bg-red-500 px-4 py-1 text-white duration-300 hover:bg-red-600'
+                    >
+                      Sıfırla
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
           </>
         )}

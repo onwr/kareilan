@@ -141,7 +141,7 @@ const ProfilOlustur = () => {
       const bugun = Timestamp.now();
       const bitisTarih = Timestamp.fromMillis(bugun.toMillis() + 365 * 24 * 60 * 60 * 1000);
 
-      await setDoc(doc(db, `kullanicilar/${userId}/ilan`, '000'), {
+      await setDoc(doc(db, `kullanicilar/${userId}/ilan`, '001'), {
         olusturmaTarih: bugun,
         bitisTarih,
       });

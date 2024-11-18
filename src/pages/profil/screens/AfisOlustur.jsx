@@ -1,4 +1,4 @@
-import { collection, doc, getDoc, getDocs, setDoc, Timestamp } from 'firebase/firestore';
+import { collection, deleteDoc, doc, getDoc, getDocs, setDoc, Timestamp } from 'firebase/firestore';
 import { motion } from 'framer-motion';
 import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
@@ -7,6 +7,8 @@ import { CiCirclePlus } from 'react-icons/ci';
 import OdemeModal from 'src/modals/odemeModal';
 import { FaWhatsapp } from 'react-icons/fa6';
 import NasilKullanilir from './modals/NasilKullanilir';
+import { confirmAlert } from 'react-confirm-alert';
+import 'react-confirm-alert/src/react-confirm-alert.css';
 
 const AfisOlustur = ({ screen, token, demo }) => {
   const [afisData, setAfisData] = useState({ iletisimBilgi: {} });
@@ -16,6 +18,7 @@ const AfisOlustur = ({ screen, token, demo }) => {
   const [showModal, setShowModal] = useState(false);
   const [fiyatlar, setFiyatlar] = useState([]);
   const [howToUseModal, setHowToUseModal] = useState(false);
+  const [ilanData, setIlanData] = useState([]);
 
   useEffect(() => {
     const kurumsalCheck = async () => {
@@ -48,6 +51,8 @@ const AfisOlustur = ({ screen, token, demo }) => {
         const ilanRef = collection(doc(db, 'kullanicilar', token), 'ilan');
         const snapshot = await getDocs(ilanRef);
         setIlanSayisi(snapshot.size);
+        const snapData = snapshot.docs.map((doc) => doc.data());
+        setIlanData(snapData);
       } catch (error) {
         toast.error('İlan sayısı alınamadı.');
       }
@@ -63,7 +68,6 @@ const AfisOlustur = ({ screen, token, demo }) => {
         const snapshot = await getDocs(fiyatRef);
         const fiyatData = snapshot.docs.map((doc) => doc.data());
         fiyatData.sort((a, b) => parseInt(a.adet) - parseInt(b.adet));
-
         setFiyatlar(fiyatData);
       } catch (error) {
         toast.error('Fiyat bilgileri alınamadı.');
@@ -106,6 +110,8 @@ const AfisOlustur = ({ screen, token, demo }) => {
           docId: yeniIlanId,
         };
 
+        setIlanData((prevData) => [...prevData, ilanData]);
+
         const docRef = doc(ilanRef, yeniIlanId);
         await setDoc(docRef, ilanData);
       }
@@ -116,6 +122,40 @@ const AfisOlustur = ({ screen, token, demo }) => {
       console.error('Afiş oluşturulurken hata oluştu:', error);
       toast.error('Lütfen daha sonra tekrar deneyiniz.');
     }
+  };
+
+  const handleAfisSil = async (id) => {
+    confirmAlert({
+      title: 'Afişi Sil',
+      message:
+        'Eğer sil derseniz afiş içeriği ve afiş tamamen hesabınızdan kaldırılacak ve tekrar satın alınmadığı sürece kullanılamayacaktır. Sadece afiş içeriğini silmek istiyorsanız İlan düzenle bölümünden afişi seçip sıfırla düğmesine tıklayınız.',
+      buttons: [
+        {
+          label: 'Sil',
+          onClick: async () => {
+            try {
+              const afisRef = doc(db, 'kullanicilar', token, 'ilan', id);
+              await deleteDoc(afisRef);
+              toast.success('Afiş başarıyla kaldırıldı.');
+              setIlanData((prevData) => prevData.filter((data) => data.docId !== id));
+              setIlanSayisi((prevCount) => prevCount - 1);
+            } catch (error) {
+              toast.error('Afiş kaldırılamadı.');
+              console.error(error);
+            }
+          },
+        },
+        {
+          label: 'Vazgeç',
+          onClick: () => {
+            toast.error('Afiş silme işlemi iptal edildi.');
+          },
+          closeOnClick: true,
+        },
+      ],
+      closeOnEscape: true,
+      closeOnClickOutside: true,
+    });
   };
 
   return (
@@ -149,6 +189,26 @@ const AfisOlustur = ({ screen, token, demo }) => {
           >
             Ödeme Yap
           </button>
+        </div>
+
+        <div className='mb-4 w-full rounded-lg border bg-yellow-100 p-2'>
+          <p className='text-center text-lg font-semibold'>Aktif Afişleriniz</p>
+          <div className='mt-3 grid grid-cols-3 gap-3 md:grid-cols-4 lg:grid-cols-6'>
+            {ilanData.map((ilan, index) => (
+              <div
+                key={index}
+                className='flex items-center justify-between rounded-lg border bg-white p-2 text-center text-xs shadow-inner'
+              >
+                <p>{ilan.docId}</p>
+                <div
+                  onClick={() => handleAfisSil(ilan.docId)}
+                  className='flex cursor-pointer rounded bg-red-500 p-2 text-white duration-300 hover:bg-red-700'
+                >
+                  Afişi Sil
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
 
         <div className='mb-4'>
