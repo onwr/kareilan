@@ -23,7 +23,6 @@ const AfisDuzenle = ({ slug, screen, token, demo }) => {
   const [selectedCompanies, setSelectedCompanies] = useState([]);
   const [kurumsalMusteri, setKurumsalMusteri] = useState(false);
   const [howToUseModal, setHowToUseModal] = useState(false);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchFirmalar = async () => {
@@ -106,6 +105,21 @@ const AfisDuzenle = ({ slug, screen, token, demo }) => {
       console.error('Hata:', error);
     }
   };
+
+
+  const handleAfisSifirla = async (e) => {
+    e.preventDefault();
+    try {
+      setAfisData({ links: {} });
+      const ilanRef = doc(db, `kullanicilar/${token}/ilan/${docId}`);
+      await updateDoc(ilanRef, afisData);
+      toast.success("Afiş sıfırlandı.")
+    } catch (error) {
+      toast.error("Afiş güncellenirken hata oluştu.")
+    }
+
+
+  }
 
   const afisSorgulaQR = async (afisAdres) => {
     if (demo) {
@@ -534,13 +548,16 @@ const AfisDuzenle = ({ slug, screen, token, demo }) => {
               </div>
             </div>
 
-            <div className='mt-2 grid grid-cols-1 items-center justify-center gap-2 md:grid-cols-2 lg:flex'>
+            <div className='mt-2 grid grid-cols-1 items-center justify-center gap-2 md:grid-cols-3 lg:flex'>
               <button
                 type='button'
                 onClick={() => setAfisOlusturModal(true)}
                 className='w-full rounded-lg border-2 border-yellow-400 px-2 py-2 text-xs font-medium duration-300 hover:bg-yellow-100 md:px-5 md:text-base'
               >
                 Afişi İndir
+              </button>
+              <button onClick={handleAfisSifirla} className='w-full border rounded-lg border-2 border-yellow-400 px-2 py-2 text-xs font-medium duration-300 hover:bg-yellow-100 md:px-5 md:text-base'>
+                Afişi Sıfırla
               </button>
               <a
                 target='_blank'
