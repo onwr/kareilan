@@ -29,11 +29,9 @@ const Firmalar = () => {
           querySnapshot.docs.map(async (doc) => {
             const userData = { id: doc.id, ...doc.data() };
 
-            // İlan koleksiyonuna eriş
             const ilanRef = collection(doc.ref, 'ilan');
             const ilanSnapshot = await getDocs(ilanRef);
 
-            // Aktif afiş sayısını hesapla
             let aktifAfisSayisi = 0;
             ilanSnapshot.forEach((ilanDoc) => {
               const ilanData = ilanDoc.data();
@@ -42,7 +40,6 @@ const Firmalar = () => {
               }
             });
 
-            // Kullanıcı bilgilerine aktif afiş sayısını ekle
             userData.aktifAfisMiktar = aktifAfisSayisi;
             userData.afisMiktar = ilanSnapshot.size;
 
@@ -213,6 +210,67 @@ const Firmalar = () => {
     }
   };
 
+  const downloadCSVTopluAfis = async () => {
+    try {
+      const kulDoc = collection(db, 'kullanicilar');
+      const kulSnap = await getDocs(kulDoc);
+      const rows = [];
+      const headers = [
+        'Kullanıcı Adı',
+        'İlan Kodu',
+        'İlan Başlığı',
+        'Oluşturma Tarihi',
+        'Bitiş Tarihi',
+      ];
+      rows.push(headers.join(';'));
+
+      for (const userDoc of kulSnap.docs) {
+        const kulSlug = userDoc.data().slug || '-';
+
+        const ilanRef = collection(userDoc.ref, 'ilan');
+        const ilanSnap = await getDocs(ilanRef);
+
+        ilanSnap.forEach((ilanDoc) => {
+          const ilanData = ilanDoc.data();
+
+          const formatDate = (timestamp) => {
+            if (!timestamp) return '-';
+            const date = timestamp.toDate();
+            return new Intl.DateTimeFormat('tr-TR', {
+              day: '2-digit',
+              month: 'long',
+              year: 'numeric',
+            }).format(date);
+          };
+
+          const rowData = [
+            kulSlug,
+            ilanData.docId,
+            ilanData.baslik || '-',
+            formatDate(ilanData.olusturmaTarih),
+            formatDate(ilanData.bitisTarih),
+          ];
+          rows.push(rowData.join(';'));
+        });
+      }
+
+      const csvContent = '\uFEFF' + rows.join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.setAttribute('href', URL.createObjectURL(blob));
+      link.setAttribute('download', `toplu_afisler.csv`);
+
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      toast.success('Tüm ilanlar başarıyla indirildi.');
+    } catch (error) {
+      console.error('Veriler alınırken hata oluştu:', error);
+      toast.error('Afiş bilgileri alınamadı.');
+    }
+  };
+
   if (loading) {
     return <div>Yükleniyor...</div>;
   }
@@ -222,9 +280,15 @@ const Firmalar = () => {
       <h2 className='mb-6 text-center text-2xl font-bold text-gray-800'>Firma Listesi</h2>
       <button
         onClick={downloadCSV}
-        className='mb-2 rounded-md bg-yellow-500 px-5 py-1 font-semibold text-white duration-300 hover:bg-yellow-600'
+        className='mb-2 mr-1 rounded-md bg-yellow-500 px-5 py-1 font-semibold text-white duration-300 hover:bg-yellow-600'
       >
         CSV İndir
+      </button>
+      <button
+        onClick={downloadCSVTopluAfis}
+        className='mb-2 rounded-md bg-indigo-500 px-5 py-1 font-semibold text-white duration-300 hover:bg-indigo-600'
+      >
+        Afiş CSV İndir
       </button>
       <div className='overflow-x-auto'>
         <table className='min-w-full table-auto overflow-hidden rounded-lg border bg-white shadow-lg'>

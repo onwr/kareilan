@@ -201,7 +201,7 @@ const AfisDuzenle = ({ slug, screen, token, demo }) => {
     }
   };
   const handleCopy = () => {
-    const link = `https://kareilan.com/${slug}/${afisLink}`;
+    const link = `https://kareilan.com/ilan/${slug}/${afisLink}`;
     navigator.clipboard.writeText(link);
     toast.success('Adres kopyalandı!');
   };
@@ -622,7 +622,7 @@ const AfisDuzenle = ({ slug, screen, token, demo }) => {
               </a>
             </div>
             <div className='mx-auto flex items-center justify-center gap-2 rounded-xl bg-yellow-300 px-5 py-2'>
-              kareilan.com/{slug}/{afisData.docId}{' '}
+              kareilan.com/ilan/{slug}/{afisData.docId}
               <FaRegCopy
                 onClick={handleCopy}
                 className='cursor-pointer text-black/50 duration-300 hover:text-black'
