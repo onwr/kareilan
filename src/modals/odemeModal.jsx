@@ -49,7 +49,7 @@ const OdemeModal = ({ isOpen, onClose }) => {
         transition={{ duration: 0.5 }}
         className='relative max-w-xl overflow-y-auto rounded-lg bg-white p-8'
       >
-        <button onClick={onClose} className='absolute right-4 top-4 rounded-full'>
+        <button onClick={() => onClose(false)} className='absolute right-4 top-4 rounded-full'>
           <IoCloseCircleOutline />
         </button>
 
