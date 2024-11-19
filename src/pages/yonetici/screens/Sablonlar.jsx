@@ -83,12 +83,12 @@ const Sablonlar = () => {
           {sablonlar.map((sablon) => (
             <motion.div
               key={sablon.id}
-              className='flex items-center justify-between rounded-lg bg-neutral-100 p-4 shadow-md'
+              className='flex flex-col items-center justify-center rounded-lg bg-neutral-100 p-4 shadow-md'
               whileHover={{ scale: 1.03 }}
             >
               <div>
-                <h3 className='text-lg font-semibold'>{sablon.baslik}</h3>
-                <p className='text-sm text-gray-500'>{sablon.aciklama}</p>
+                <h3 className='text-clip text-lg font-semibold'>{sablon.baslik}</h3>
+                <p className='text-center text-sm text-gray-500'>{sablon.aciklama}</p>
               </div>
               <div className='flex space-x-2'>
                 <button

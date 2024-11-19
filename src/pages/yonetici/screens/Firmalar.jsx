@@ -10,6 +10,7 @@ import React, { useEffect, useState } from 'react';
 import { db } from 'src/db/Firebase';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
+import { FaDownload } from 'react-icons/fa6';
 
 const Firmalar = () => {
   const [kullanicilar, setKullanicilar] = useState([]);
@@ -28,10 +29,22 @@ const Firmalar = () => {
           querySnapshot.docs.map(async (doc) => {
             const userData = { id: doc.id, ...doc.data() };
 
+            // İlan koleksiyonuna eriş
             const ilanRef = collection(doc.ref, 'ilan');
-            const ilanSnapshot = await getCountFromServer(ilanRef);
+            const ilanSnapshot = await getDocs(ilanRef);
 
-            userData.afisMiktar = ilanSnapshot.data().count;
+            // Aktif afiş sayısını hesapla
+            let aktifAfisSayisi = 0;
+            ilanSnapshot.forEach((ilanDoc) => {
+              const ilanData = ilanDoc.data();
+              if (ilanData.durum === true) {
+                aktifAfisSayisi++;
+              }
+            });
+
+            // Kullanıcı bilgilerine aktif afiş sayısını ekle
+            userData.aktifAfisMiktar = aktifAfisSayisi;
+            userData.afisMiktar = ilanSnapshot.size;
 
             return userData;
           })
@@ -102,6 +115,104 @@ const Firmalar = () => {
     }
   };
 
+  const formatDate = (date) => {
+    const options = { day: 'numeric', month: 'long', year: 'numeric' };
+    return new Date(date).toLocaleDateString('tr-TR', options);
+  };
+
+  const downloadCSV = () => {
+    const csvRows = [];
+    const headers = [
+      'F. Kod',
+      'Firma Adi',
+      'Kullanici Adi',
+      'Ad',
+      'Telefon',
+      'E-Posta',
+      'Afiş Miktar',
+      'Durum',
+      'Kurumsal Hesap',
+      'Oluşturma Tarihi',
+    ];
+
+    csvRows.push(headers.join(';'));
+
+    kullanicilar.forEach((kullanici) => {
+      const rowData = [
+        kullanici.fKod || '-',
+        kullanici.firma || '-',
+        kullanici.slug || '-',
+        kullanici.ad || '-',
+        kullanici.gsm || '-',
+        kullanici.email || '-',
+        kullanici.afisMiktar || 0,
+        kullanici.durum ? 'Aktif' : 'Pasif',
+        kullanici.kurumsal ? 'Kurumsal hesap' : 'Pasif',
+        kullanici.olusturmaTarih ? formatDate(kullanici.olusturmaTarih) : '-',
+      ];
+      csvRows.push(rowData.join(';'));
+    });
+
+    const csvContent = '\uFEFF' + csvRows.join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.setAttribute('href', URL.createObjectURL(blob));
+    link.setAttribute('download', 'kullanicilar.csv');
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleDownloadAfis = async (kulId, ad) => {
+    try {
+      const afisRef = collection(doc(db, 'kullanicilar', kulId), 'ilan');
+      const afisSnapshot = await getDocs(afisRef);
+
+      const csvRows = [];
+      const headers = ['Afiş Kodu', 'Afiş Başlığı', 'Oluşturma Tarihi', 'Bitiş Tarihi'];
+      csvRows.push(headers.join(';'));
+
+      afisSnapshot.docs.forEach((doc) => {
+        const afisData = doc.data();
+
+        const formatDate = (timestamp) => {
+          if (!timestamp) return '-';
+          const date = timestamp.toDate();
+          return new Intl.DateTimeFormat('tr-TR', {
+            day: '2-digit',
+            month: 'long',
+            year: 'numeric',
+          }).format(date);
+        };
+
+        const rowData = [
+          afisData.docId,
+          afisData.baslik || '-',
+          formatDate(afisData.olusturmaTarih),
+          formatDate(afisData.bitisTarih),
+        ];
+        csvRows.push(rowData.join(';'));
+      });
+
+      const csvContent = '\uFEFF' + csvRows.join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.setAttribute('href', URL.createObjectURL(blob));
+      link.setAttribute('download', `kullanici_${ad}_afisler.csv`);
+
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      toast.success('Kullanıcı ilanları başarıyla indirildi.');
+    } catch (error) {
+      console.error('İlanlar çekilirken hata oluştu:', error);
+      toast.error('Kullanıcı ilanları çekilemedi.');
+    }
+  };
+
   if (loading) {
     return <div>Yükleniyor...</div>;
   }
@@ -109,7 +220,12 @@ const Firmalar = () => {
   return (
     <div className='container mx-auto p-4'>
       <h2 className='mb-6 text-center text-2xl font-bold text-gray-800'>Firma Listesi</h2>
-
+      <button
+        onClick={downloadCSV}
+        className='mb-2 rounded-md bg-yellow-500 px-5 py-1 font-semibold text-white duration-300 hover:bg-yellow-600'
+      >
+        CSV İndir
+      </button>
       <div className='overflow-x-auto'>
         <table className='min-w-full table-auto overflow-hidden rounded-lg border bg-white shadow-lg'>
           <thead>
@@ -120,6 +236,8 @@ const Firmalar = () => {
               <th className='px-6 py-3 text-left'>Telefon</th>
               <th className='px-6 py-3 text-left'>E-Posta</th>
               <th className='px-6 py-3 text-left'>Afiş Miktar</th>
+              <th className='px-6 py-3 text-left'>Aktif Afiş</th>
+              <th className='px-6 py-3 text-left'>Oluşturma Tarihi</th>
               <th className='px-6 py-3 text-center'>İşlemler</th>
             </tr>
           </thead>
@@ -140,19 +258,29 @@ const Firmalar = () => {
                   <td className='px-6 py-4'>{kullanici.gsm || '-'}</td>
                   <td className='px-6 py-4'>{kullanici.email || '-'}</td>
                   <td className='px-6 py-4'>{kullanici.afisMiktar || 0}</td>
-                  <td className='px-6 py-4 text-center'>
+                  <td className='px-6 py-4'>{kullanici.aktifAfisMiktar || 0}</td>
+                  <td className='px-6 py-4'>
+                    {kullanici.olusturmaTarih ? formatDate(kullanici.olusturmaTarih) : 0}
+                  </td>
+                  <td className='flex items-center justify-center gap-2 px-6 py-4 text-center'>
                     <button
-                      className='mr-2 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600'
+                      className='rounded bg-blue-500 px-2 py-1 text-white hover:bg-blue-600'
                       onClick={() => setSelectedKullanici(kullanici)}
                     >
                       Daha Fazla
                     </button>
                     <button
-                      className='rounded bg-red-500 px-4 py-2 text-white hover:bg-red-600'
+                      className='rounded bg-red-500 px-2 py-1 text-white hover:bg-red-600'
                       onClick={() => handleDelete(kullanici.id)}
                     >
                       Sil
                     </button>
+                    <button
+                      className='rounded bg-yellow-500 px-2 py-2 text-white hover:bg-yellow-600'
+                      onClick={() => handleDownloadAfis(kullanici.id, kullanici.ad)}
+                    >
+                      <FaDownload />
+                    </button>{' '}
                   </td>
                 </motion.tr>
               ))}

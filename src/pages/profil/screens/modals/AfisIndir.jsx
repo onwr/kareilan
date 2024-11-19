@@ -6,7 +6,7 @@ import jsPDF from 'jspdf';
 import { IoCloseCircleOutline } from 'react-icons/io5';
 
 const AfisIndir = ({ onClose, slug, docId }) => {
-  const ilanURL = 'https://kareilan.com/ilan/' + slug + '/' + docId; // örnek çıktı https://kareilan.com/ilan/kurkayaemlak/001
+  const ilanURL = 'https://kareilan.com/ilan/' + slug + '/' + docId;
 
   const downloadPDF = () => {
     const pdf = new jsPDF('p', 'pt', 'a0');

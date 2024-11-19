@@ -7,7 +7,7 @@ import { CiCirclePlus } from 'react-icons/ci';
 import OdemeModal from 'src/modals/odemeModal';
 import { FaWhatsapp } from 'react-icons/fa6';
 import NasilKullanilir from './modals/NasilKullanilir';
-import './styles/ConfirmModal.css'
+import './styles/ConfirmModal.css';
 
 const AfisOlustur = ({ screen, token, demo }) => {
   const [afisData, setAfisData] = useState({ iletisimBilgi: {} });
@@ -105,6 +105,7 @@ const AfisOlustur = ({ screen, token, demo }) => {
           ...afisData,
           olusturmaTarih,
           bitisTarih,
+          durum: true,
           links: {},
           docId: yeniIlanId,
         };
@@ -123,9 +124,6 @@ const AfisOlustur = ({ screen, token, demo }) => {
     }
   };
 
-
-  
-
   return (
     <div>
       <motion.div
@@ -135,7 +133,6 @@ const AfisOlustur = ({ screen, token, demo }) => {
         transition={{ duration: 0.5 }}
         className='relative mt-5'
       >
-        
         <button
           onClick={() => setHowToUseModal(true)}
           className='absolute right-0 top-0 cursor-pointer rounded-lg bg-gradient-to-r from-red-400 to-red-600 p-2 text-xs text-white hover:to-red-200'

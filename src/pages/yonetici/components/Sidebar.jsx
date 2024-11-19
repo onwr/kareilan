@@ -1,21 +1,20 @@
 import React, { useState } from 'react';
-import logo from '@images/logo.png';
-import logo2 from '@images/logo2.png';
-import { FaArrowDown, FaArrowUp } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
 import { RxHamburgerMenu } from 'react-icons/rx';
-import { useNavigate } from 'react-router-dom';
+import { FaArrowDown, FaArrowUp } from 'react-icons/fa';
+import logo from '@images/logo.png';
+import logo2 from '@images/logo2.png';
 
 const Sidebar = ({ screen }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isKullaniciDropdownOpen, setIsKullaniciDropdownOpen] = useState(false);
-  const [isKisitDropdownOpen, setIsKisitDropdownOpen] = useState(false);
-  const [isSablonDropdownOpen, setIsSablonDropdownOpen] = useState(false);
-  const [isOdemeDropDown, setIsOdemeDropDown] = useState(false);
-  const [isSozlesmeDropDown, setIsSozlesmeDropDown] = useState(false);
-  const [isEgitimVideolarDropDown, setIsEgitimVideolarDropDown] = useState(false);
+  const [dropdownState, setDropdownState] = useState({});
 
-  const navigate = useNavigate();
+  const toggleDropdown = (name) => {
+    setDropdownState((prevState) => ({
+      ...prevState,
+      [name]: !prevState[name],
+    }));
+  };
 
   const dropdownVariants = {
     hidden: { opacity: 0, height: 0 },
@@ -23,286 +22,121 @@ const Sidebar = ({ screen }) => {
   };
 
   return (
-    <div className='relative flex flex-col items-center border-r shadow-2xl'>
+    <div className='relative'>
       <button
-        className='absolute left-4 top-4 md:hidden'
+        className='absolute left-4 top-4 z-50'
         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
       >
-        <RxHamburgerMenu className='text-3xl' />
+        <RxHamburgerMenu className='text-3xl text-black' />
       </button>
 
-      <div className={`mt-5 w-full ${isSidebarOpen ? 'block' : 'hidden'} md:block`}>
-        <img
-          src={logo}
-          onClick={() => navigate('/')}
-          className='mx-auto mt-5 w-24 cursor-pointer'
-          alt='Logo'
-        />
-
-        <div className='mt-8 w-full px-4'>
-          <button
-            onClick={() => setIsKullaniciDropdownOpen(!isKullaniciDropdownOpen)}
-            className='flex w-full items-center justify-between rounded bg-yellow-500 px-4 py-2 font-semibold text-white hover:bg-yellow-600'
+      <AnimatePresence>
+        {isSidebarOpen && (
+          <motion.div
+            className='fixed inset-0 z-40 flex flex-col bg-white shadow-lg md:relative md:inset-auto md:w-64 md:shadow-none'
+            initial={{ x: '-100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '-100%' }}
+            transition={{ duration: 0.3 }}
           >
-            <span>Kullanıcı Yönetimi</span>
-            {isKullaniciDropdownOpen ? <FaArrowUp /> : <FaArrowDown />}
-          </button>
+            <div className='mt-5 flex justify-center'>
+              <img
+                src={logo}
+                alt='Logo'
+                className='w-24 cursor-pointer'
+                onClick={() => screen(0)}
+              />
+            </div>
 
-          <AnimatePresence>
-            {isKullaniciDropdownOpen && (
-              <motion.div
-                className='overflow-hidden rounded bg-white shadow-lg'
-                initial='hidden'
-                animate='visible'
-                exit='hidden'
-                variants={dropdownVariants}
-                transition={{ duration: 0.3, ease: 'easeInOut' }}
-              >
-                <ul className='flex flex-col'>
-                  <li className='border-b'>
-                    <button
-                      onClick={() => screen(0)}
-                      className='block w-full px-4 py-2 hover:bg-gray-100'
-                    >
-                      Kullanıcı İşlemleri
-                    </button>
-                  </li>
-                  <li className='border-b'>
-                    <button
-                      onClick={() => screen(7)}
-                      className='block w-full px-4 py-2 hover:bg-gray-100'
-                    >
-                      Kullanıcılar
-                    </button>
-                  </li>
-                  <li>
-                    <button
-                      onClick={() => screen(8)}
-                      className='block w-full px-4 py-2 hover:bg-gray-100'
-                    >
-                      Kullanıcı Oluştur
-                    </button>
-                  </li>
-                </ul>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+            <div className='mt-8 space-y-4 px-4'>
+              {[
+                {
+                  label: 'Kullanıcı Yönetimi',
+                  items: [
+                    { label: 'Kullanıcı İşlemleri', action: () => screen(0) },
+                    { label: 'Kullanıcılar', action: () => screen(7) },
+                    { label: 'Kullanıcı Oluştur', action: () => screen(8) },
+                  ],
+                },
+                {
+                  label: 'Firma ve Portallar',
+                  items: [
+                    { label: 'Oluştur', action: () => screen(3) },
+                    { label: 'Firma ve Portallar', action: () => screen(4) },
+                  ],
+                },
+                {
+                  label: 'Şablonlar',
+                  items: [
+                    { label: 'Yeni Şablon', action: () => screen(1) },
+                    { label: 'Kategori Oluştur', action: () => screen(9) },
+                    { label: 'Şablonlar', action: () => screen(2) },
+                  ],
+                },
+                {
+                  label: 'Ödeme Yönetimi',
+                  items: [
+                    { label: 'Ödeme Yöntemi Ekle', action: () => screen(5) },
+                    { label: 'İlan Fiyatları', action: () => screen(10) },
+                    {
+                      label: 'Aktif Ödeme Yöntemleri',
+                      action: () => screen(6),
+                    },
+                  ],
+                },
+                {
+                  label: 'Sözleşmeler',
+                  items: [{ label: 'Kullanıcı Sözleşmesi', action: () => screen(11) }],
+                },
+                {
+                  label: 'Nasıl Kullanılır',
+                  items: [{ label: 'Videolar', action: () => screen(12) }],
+                },
+              ].map((menu, index) => (
+                <div key={index}>
+                  <button
+                    onClick={() => toggleDropdown(menu.label)}
+                    className='flex w-full items-center justify-between rounded-lg bg-yellow-500 px-4 py-2 text-white'
+                  >
+                    <span>{menu.label}</span>
+                    {dropdownState[menu.label] ? <FaArrowUp /> : <FaArrowDown />}
+                  </button>
 
-        <div className='mt-5 w-full px-4'>
-          <button
-            onClick={() => setIsKisitDropdownOpen(!isKisitDropdownOpen)}
-            className='flex w-full items-center justify-between rounded bg-yellow-500 px-4 py-2 font-semibold text-white hover:bg-yellow-600'
-          >
-            <span>Firma ve Portallar</span>
-            {isKisitDropdownOpen ? <FaArrowUp /> : <FaArrowDown />}
-          </button>
+                  <AnimatePresence>
+                    {dropdownState[menu.label] && (
+                      <motion.div
+                        className='overflow-hidden rounded-lg bg-gray-100 shadow-lg'
+                        initial='hidden'
+                        animate='visible'
+                        exit='hidden'
+                        variants={dropdownVariants}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <ul className='flex flex-col'>
+                          {menu.items.map((item, idx) => (
+                            <li key={idx}>
+                              <button
+                                onClick={item.action}
+                                className='block w-full px-4 py-2 hover:bg-gray-200'
+                              >
+                                {item.label}
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              ))}
+            </div>
 
-          <AnimatePresence>
-            {isKisitDropdownOpen && (
-              <motion.div
-                className='overflow-hidden rounded bg-white shadow-lg'
-                initial='hidden'
-                animate='visible'
-                exit='hidden'
-                variants={dropdownVariants}
-                transition={{ duration: 0.3, ease: 'easeInOut' }}
-              >
-                <ul className='flex flex-col'>
-                  <li className='border-b'>
-                    <button
-                      onClick={() => screen(3)}
-                      className='block w-full px-4 py-2 hover:bg-gray-100'
-                    >
-                      Oluştur
-                    </button>
-                  </li>
-                  <li>
-                    <button
-                      onClick={() => screen(4)}
-                      className='block w-full px-4 py-2 hover:bg-gray-100'
-                    >
-                      Firma ve Portallar
-                    </button>
-                  </li>
-                </ul>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-
-        <div className='mt-5 w-full px-4'>
-          <button
-            onClick={() => setIsSablonDropdownOpen(!isSablonDropdownOpen)}
-            className='flex w-full items-center justify-between rounded bg-yellow-500 px-4 py-2 font-semibold text-white hover:bg-yellow-600'
-          >
-            <span>Şablonlar</span>
-            {isSablonDropdownOpen ? <FaArrowUp /> : <FaArrowDown />}
-          </button>
-
-          <AnimatePresence>
-            {isSablonDropdownOpen && (
-              <motion.div
-                className='overflow-hidden rounded bg-white shadow-lg'
-                initial='hidden'
-                animate='visible'
-                exit='hidden'
-                variants={dropdownVariants}
-                transition={{ duration: 0.3, ease: 'easeInOut' }}
-              >
-                <ul className='flex flex-col'>
-                  <li className='border-b'>
-                    <button
-                      onClick={() => screen(1)}
-                      className='block w-full px-4 py-2 hover:bg-gray-100'
-                    >
-                      Yeni Şablon
-                    </button>
-                  </li>
-                  <li className='border-b'>
-                    <button
-                      onClick={() => screen(9)}
-                      className='block w-full px-4 py-2 hover:bg-gray-100'
-                    >
-                      Kategori Oluştur
-                    </button>
-                  </li>
-                  <li>
-                    <button
-                      onClick={() => screen(2)}
-                      className='block w-full px-4 py-2 hover:bg-gray-100'
-                    >
-                      Şablonlar
-                    </button>
-                  </li>
-                </ul>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-
-        <div className='mt-5 w-full px-4'>
-          <button
-            onClick={() => setIsOdemeDropDown(!isOdemeDropDown)}
-            className='flex w-full items-center justify-between rounded bg-yellow-500 px-4 py-2 font-semibold text-white hover:bg-yellow-600'
-          >
-            <span>Ödeme Yönetimi</span>
-            {isOdemeDropDown ? <FaArrowUp /> : <FaArrowDown />}
-          </button>
-
-          <AnimatePresence>
-            {isOdemeDropDown && (
-              <motion.div
-                className='overflow-hidden rounded bg-white shadow-lg'
-                initial='hidden'
-                animate='visible'
-                exit='hidden'
-                variants={dropdownVariants}
-                transition={{ duration: 0.3, ease: 'easeInOut' }}
-              >
-                <ul className='flex flex-col'>
-                  <li className='border-b'>
-                    <button
-                      onClick={() => screen(5)}
-                      className='block w-full px-4 py-2 hover:bg-gray-100'
-                    >
-                      Ödeme Yöntemi Ekle
-                    </button>
-                  </li>
-                  <li className='border-b'>
-                    <button
-                      onClick={() => screen(10)}
-                      className='block w-full px-4 py-2 hover:bg-gray-100'
-                    >
-                      İlan Fiyatları
-                    </button>
-                  </li>
-                  <li>
-                    <button
-                      onClick={() => screen(6)}
-                      className='block w-full px-4 py-2 hover:bg-gray-100'
-                    >
-                      Aktif Ödeme Yöntemleri
-                    </button>
-                  </li>
-                </ul>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-
-        <div className='mt-5 w-full px-4'>
-          <button
-            onClick={() => setIsSozlesmeDropDown(!isSozlesmeDropDown)}
-            className='flex w-full items-center justify-between rounded bg-yellow-500 px-4 py-2 font-semibold text-white hover:bg-yellow-600'
-          >
-            <span>Sözleşmeler</span>
-            {isSozlesmeDropDown ? <FaArrowUp /> : <FaArrowDown />}
-          </button>
-
-          <AnimatePresence>
-            {isSozlesmeDropDown && (
-              <motion.div
-                className='overflow-hidden rounded bg-white shadow-lg'
-                initial='hidden'
-                animate='visible'
-                exit='hidden'
-                variants={dropdownVariants}
-                transition={{ duration: 0.3, ease: 'easeInOut' }}
-              >
-                <ul className='flex flex-col'>
-                  <li>
-                    <button
-                      onClick={() => screen(11)}
-                      className='block w-full px-4 py-2 hover:bg-gray-100'
-                    >
-                      Kullanıcı Sözleşmesi
-                    </button>
-                  </li>
-                </ul>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-
-        <div className='mt-5 w-full px-4'>
-          <button
-            onClick={() => setIsEgitimVideolarDropDown(!isEgitimVideolarDropDown)}
-            className='flex w-full items-center justify-between rounded bg-yellow-500 px-4 py-2 font-semibold text-white hover:bg-yellow-600'
-          >
-            <span>Nasıl Kullanılır</span>
-            {isEgitimVideolarDropDown ? <FaArrowUp /> : <FaArrowDown />}
-          </button>
-
-          <AnimatePresence>
-            {isEgitimVideolarDropDown && (
-              <motion.div
-                className='overflow-hidden rounded bg-white shadow-lg'
-                initial='hidden'
-                animate='visible'
-                exit='hidden'
-                variants={dropdownVariants}
-                transition={{ duration: 0.3, ease: 'easeInOut' }}
-              >
-                <ul className='flex flex-col'>
-                  <li>
-                    <button
-                      onClick={() => screen(12)}
-                      className='block w-full px-4 py-2 hover:bg-gray-100'
-                    >
-                      Videolar
-                    </button>
-                  </li>
-                </ul>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-
-        <div className='absolute bottom-0 w-full border-t bg-black px-5 py-2'>
-          <img src={logo2} className='mx-auto w-24' alt='Kürkaya Yazılım' />
-        </div>
-      </div>
+            <div className='mt-auto bg-black p-4 md:hidden'>
+              <img src={logo2} alt='Kürkaya Yazılım' className='mx-auto w-24' />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

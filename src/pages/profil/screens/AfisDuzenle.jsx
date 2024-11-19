@@ -159,6 +159,7 @@ const AfisDuzenle = ({ slug, screen, token, demo }) => {
       const ilanDoc = await getDoc(ilanRef);
 
       if (ilanDoc.exists()) {
+        setDocId(ilanDoc.data().docId);
         setAfisData(ilanDoc.data() || { links: {} });
         toast.success('İlan verisi getirildi!');
         setVeriGetirildi(true);
@@ -187,6 +188,7 @@ const AfisDuzenle = ({ slug, screen, token, demo }) => {
       const ilanDoc = await getDoc(ilanRef);
 
       if (ilanDoc.exists()) {
+        setDocId(ilanDoc.data().docId);
         setAfisData(ilanDoc.data() || { links: {} });
         toast.success('İlan verisi getirildi!');
         setVeriGetirildi(true);

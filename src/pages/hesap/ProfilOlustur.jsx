@@ -3,16 +3,7 @@ import logo from '@images/logo.png';
 import emlak from '@images/emlak.jpg';
 import { auth, db } from '../../db/Firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import {
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  query,
-  setDoc,
-  Timestamp,
-  where,
-} from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, query, setDoc, where } from 'firebase/firestore';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import Loader from 'src/layout/Loader';
@@ -136,16 +127,6 @@ const ProfilOlustur = () => {
         admin: false,
         durum: true,
         olusturmaTarih: new Date().toISOString(),
-      });
-
-      const bugun = Timestamp.now();
-      const bitisTarih = Timestamp.fromMillis(bugun.toMillis() + 365 * 24 * 60 * 60 * 1000);
-
-      await setDoc(doc(db, `kullanicilar/${userId}/ilan`, '001'), {
-        olusturmaTarih: bugun,
-        docId: "001",
-        links: {},
-        bitisTarih,
       });
 
       toast.success('Kayıt başarılı. Yönlendiriliyorsunuz...');

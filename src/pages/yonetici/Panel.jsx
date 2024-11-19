@@ -13,6 +13,7 @@ import SablonKategori from './screens/SablonKategori';
 import IlanFiyat from './screens/IlanFiyat';
 import KullaniciSozlesme from './screens/sozlesmeler/KullaniciSozlesme';
 import NasilKullanilir from './screens/NasilKullanilir';
+import logo2 from '@images/logo2.png';
 
 const Panel = () => {
   const [selectIndex, setSelectedIndex] = useState(0);
@@ -34,6 +35,9 @@ const Panel = () => {
         {selectIndex === 10 && <IlanFiyat />}
         {selectIndex === 11 && <KullaniciSozlesme />}
         {selectIndex === 12 && <NasilKullanilir />}
+      </div>
+      <div className='fixed bottom-0 hidden w-full bg-black py-2 md:block'>
+        <img src={logo2} alt='Kürkaya Yazılım' className='mx-auto w-24' />
       </div>
     </div>
   );
