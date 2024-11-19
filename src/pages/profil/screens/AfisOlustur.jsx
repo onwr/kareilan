@@ -7,8 +7,6 @@ import { CiCirclePlus } from 'react-icons/ci';
 import OdemeModal from 'src/modals/odemeModal';
 import { FaWhatsapp } from 'react-icons/fa6';
 import NasilKullanilir from './modals/NasilKullanilir';
-import { confirmAlert } from 'react-confirm-alert';
-import 'react-confirm-alert/src/react-confirm-alert.css';
 import './styles/ConfirmModal.css'
 
 const AfisOlustur = ({ screen, token, demo }) => {
@@ -125,41 +123,6 @@ const AfisOlustur = ({ screen, token, demo }) => {
     }
   };
 
-  const handleAfisSil = async (id) => {
-    confirmAlert({
-      title: <p className='text-center text-lg font-bold mb-1'>Afiş Sil</p>,
-      message:
-        <p className='text-center font-medium'>Eğer sil derseniz afiş içeriği ve afiş tamamen hesabınızdan kaldırılacak ve tekrar satın alınmadığı sürece kullanılamayacaktır. Sadece afiş içeriğini silmek istiyorsanız İlan düzenle bölümünden afişi seçip sıfırla düğmesine tıklayınız.</p>,
-      buttons: [
-        {
-          label: 'Sil',
-          onClick: async () => {
-            try {
-              const afisRef = doc(db, 'kullanicilar', token, 'ilan', id);
-              await deleteDoc(afisRef);
-              toast.success('Afiş başarıyla kaldırıldı.');
-              setIlanData((prevData) => prevData.filter((data) => data.docId !== id));
-              setIlanSayisi((prevCount) => prevCount - 1);
-            } catch (error) {
-              toast.error('Afiş kaldırılamadı.');
-              console.error(error);
-            }
-          },
-        },
-        {
-          label: 'Vazgeç',
-          onClick: () => {
-            toast.error('Afiş silme işlemi iptal edildi.');
-          },
-          className: 'cancel-button',
-          closeOnClick: true,
-        },
-      ],
-      closeOnEscape: true,
-      closeOnClickOutside: true,
-      
-    });
-  };
 
   
 
@@ -203,15 +166,9 @@ const AfisOlustur = ({ screen, token, demo }) => {
             {ilanData.map((ilan, index) => (
               <div
                 key={index}
-                className='flex items-center justify-between rounded-lg border bg-white p-2 text-center text-xs shadow-inner'
+                className='flex items-center justify-center rounded-lg border bg-white p-2 text-center text-xs shadow-inner'
               >
-                <p>{ilan.docId}</p>
-                <div
-                  onClick={() => handleAfisSil(ilan.docId)}
-                  className='flex cursor-pointer rounded bg-red-500 p-2 text-white duration-300 hover:bg-red-700'
-                >
-                  Afişi Sil
-                </div>
+                <p className='text-center font-bold'>{ilan.docId}</p>
               </div>
             ))}
           </div>

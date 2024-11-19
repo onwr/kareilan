@@ -143,6 +143,8 @@ const ProfilOlustur = () => {
 
       await setDoc(doc(db, `kullanicilar/${userId}/ilan`, '001'), {
         olusturmaTarih: bugun,
+        docId: "001",
+        links: {},
         bitisTarih,
       });
 
